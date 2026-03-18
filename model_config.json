@@ -1,0 +1,10 @@
+{
+  "enabled_models": [
+    "best_model.keras",
+    "best_plant_detector.keras",
+    "fast_model_1",
+    "fast_model_2",
+    "fast_model_3",
+    "lefora.keras"
+  ]
+}

@@ -1,0 +1,445 @@
+/* landing.css - Modern AI Agriculture Theme */
+
+/* Allow global background on landing pages if needed */
+body.landing-page:not(.dashboard-page) #global-canvas-container,
+body.landing-page:not(.dashboard-page) .bg-mesh {
+    display: block !important;
+}
+
+/* --- Variables & Theming --- */
+:root {
+    --landing-bg: #0f1115;
+    --landing-card-bg: rgba(255, 255, 255, 0.03);
+    --landing-border: rgba(255, 255, 255, 0.08);
+    --landing-accent: #22c55e;
+    --landing-accent-glow: rgba(34, 197, 94, 0.4);
+    --landing-text-primary: #ffffff;
+    --landing-text-secondary: #a0a0a0;
+    --landing-text-muted: #b0b3b8; /* Lighter for better visibility */
+}
+
+/* Force dark mode styles for landing page regardless of system theme */
+body.landing-page {
+    background-color: transparent !important;
+    color: var(--landing-text-primary);
+    overflow-x: hidden;
+}
+
+/* Restrict moving background animation to hero area only */
+.landing-page:not(.dashboard-page) #global-canvas-container {
+    display: block !important;
+}
+
+.landing-page:not(.dashboard-page) .bg-mesh {
+    display: block !important;
+}
+
+/* Allow light mode overrides if user explicitly toggles it */
+[data-theme="light"] body.landing-page {
+    background-color: #f0f2f5 !important;
+    color: #212529;
+    --landing-card-bg: rgba(255, 255, 255, 0.9);
+    --landing-border: rgba(0, 0, 0, 0.08);
+    --landing-text-primary: #1a1d21;
+    --landing-text-secondary: #4a5568;
+    --landing-text-muted: #64748b;
+}
+
+[data-theme="light"] .hero-title {
+    background: linear-gradient(135deg, #1a1d21 0%, #2d3748 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .hero-overlay {
+    background: radial-gradient(circle at 50% 50%, transparent 0%, #f0f2f5 80%);
+}
+
+[data-theme="light"] .glass-card {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+}
+
+[data-theme="light"] .text-white {
+    color: #1a1d21 !important;
+}
+
+/* Fix for dark glass elements in light mode (like the scanner header) */
+[data-theme="light"] .bg-dark-glass {
+    background: #1a1d21; /* Keep it dark for contrast with white text, or make it light */
+    color: #ffffff !important;
+}
+
+/* Ensure text inside dark glass remains white in light mode if we keep the background dark */
+[data-theme="light"] .bg-dark-glass .text-white,
+[data-theme="light"] .bg-dark-glass h6 {
+    color: #ffffff !important;
+}
+
+/* Fix text visibility overrides */
+.landing-page .text-muted {
+    color: var(--landing-text-muted) !important;
+}
+
+.landing-page .text-success {
+    color: #4ade80 !important; /* Brighter green for dark mode */
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+}
+
+/* --- Navbar Blending --- */
+.full-width .navbar {
+    background: rgba(15, 17, 21, 0.7) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030; /* Bootstrap default for fixed-top */
+    transition: background 0.3s ease;
+}
+
+[data-theme="light"] .full-width .navbar {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* --- Hero Section --- */
+.landing-page .main-content {
+    padding-top: 60px !important; /* Tighter to navbar */
+}
+
+.hero-section {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 0px !important; /* Removed extra padding */
+    overflow: hidden;
+    background-color: #000000; /* Set background here instead of canvas */
+}
+
+#landingHeroCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; /* Move to bottom of hero stack */
+    pointer-events: none;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Softened the gradient to ensure animation visibility */
+    background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.8) 100%);
+    z-index: 1; /* Above canvas, below content */
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2; /* Above everything else */
+}
+
+.glass-card {
+    background: var(--landing-card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--landing-border);
+    border-radius: 16px;
+}
+
+.scan-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: var(--landing-accent);
+    box-shadow: 0 0 10px var(--landing-accent);
+    top: 0;
+    left: 0;
+    animation: scan 3s linear infinite;
+    z-index: 3;
+}
+
+@keyframes scan {
+    0% { top: 0; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+}
+
+.pulse-glow {
+    animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 var(--landing-accent-glow); }
+    70% { box-shadow: 0 0 0 10px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.float-animation {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+/* Feature Cards */
+.feature-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px -10px rgba(34, 197, 94, 0.2);
+    border-color: var(--landing-accent);
+}
+
+.feature-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: rgba(34, 197, 94, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon-wrapper {
+    background: var(--landing-accent);
+    color: white !important;
+}
+
+.feature-card:hover .feature-icon-wrapper i {
+    color: white !important;
+}
+
+/* --- Timeline / How It Works (FIXED) --- */
+.timeline-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    padding: 2rem 0;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+/* Connecting Line (The Route) */
+.timeline-steps::before {
+    content: '';
+    position: absolute;
+    top: 30px;
+    left: 5%;
+    width: 90%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 0;
+}
+
+[data-theme="light"] .timeline-steps::before {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.step-item {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    flex: 1;
+    min-width: 200px;
+    transition: transform 0.3s ease;
+    cursor: default;
+    padding: 1rem;
+    border-radius: 12px;
+}
+
+.step-item:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.step-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--landing-card-bg);
+    border: 1px solid var(--landing-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    font-size: 1.5rem;
+    color: var(--landing-text-muted);
+    transition: all 0.3s ease;
+    box-shadow: 0 0 0 10px var(--landing-bg);
+}
+
+[data-theme="light"] .step-icon {
+    box-shadow: 0 0 0 10px #f0f2f5;
+    background: #ffffff;
+}
+
+/* Hover Effects for Step Items */
+.step-item:hover .step-icon {
+    background: var(--landing-accent);
+    color: #fff;
+    border-color: var(--landing-accent);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4), 0 0 0 10px var(--landing-bg);
+    transform: scale(1.1);
+}
+
+[data-theme="light"] .step-item:hover .step-icon {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4), 0 0 0 10px #f0f2f5;
+}
+
+.step-item:hover h4 {
+    color: var(--landing-accent) !important;
+}
+
+/* Mobile Responsive Fixes for Timeline */
+@media (max-width: 768px) {
+    .timeline-steps {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-left: 20px;
+    }
+    
+    .timeline-steps::before {
+        width: 2px;
+        height: 100%;
+        left: 50px;
+        top: 0;
+    }
+    
+    .step-item {
+        display: flex;
+        text-align: left;
+        margin-bottom: 2rem;
+        align-items: flex-start;
+        padding: 0;
+        background: transparent !important;
+    }
+    
+    .step-icon {
+        margin: 0 1.5rem 0 0;
+        box-shadow: 0 0 0 10px var(--landing-bg);
+    }
+}
+
+/* --- Buttons --- */
+.btn-glow {
+    background: var(--landing-accent);
+    color: #fff;
+    border: none;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+    transition: all 0.3s ease;
+}
+
+.btn-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.6);
+    color: #fff;
+}
+
+.btn-outline-light:hover {
+    background: var(--landing-accent);
+    border-color: var(--landing-accent);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+}
+
+/* --- Pricing Cards --- */
+.hover-scale:hover {
+    transform: translateY(-10px);
+}
+
+.pricing-card.pro {
+    border: 1px solid var(--landing-accent);
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.15);
+}
+
+.pricing-card.pro:hover {
+    box-shadow: 0 0 50px rgba(34, 197, 94, 0.3);
+}
+
+.badge-pro {
+    background: var(--landing-accent);
+    color: black;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    box-shadow: 0 0 15px var(--landing-accent);
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+/* --- Animations --- */
+/* Progress Bar Live Animation */
+@keyframes barFluctuate {
+    0% { transform: scaleX(1); opacity: 0.85; }
+    25% { transform: scaleX(0.98); opacity: 1; }
+    50% { transform: scaleX(0.99); opacity: 0.9; }
+    75% { transform: scaleX(0.97); opacity: 1; }
+    100% { transform: scaleX(1); opacity: 0.85; }
+}
+
+.bar-fluctuate {
+    transform-origin: left;
+    animation: barFluctuate 4s ease-in-out infinite;
+}
+
+.bar-fluctuate-1 { animation-delay: 0s; }
+.bar-fluctuate-2 { animation-delay: 1.2s; }
+.bar-fluctuate-3 { animation-delay: 0.5s; }
+
+/* AI Text Scan Animation */
+.ai-scan-text {
+    position: relative;
+    color: #fff;
+    background: linear-gradient(to right, #fff 45%, #4ade80 50%, #fff 55%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: textScan 3s linear infinite;
+}
+
+@keyframes textScan {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+.scanner-icon {
+    animation: rotateScan 4s linear infinite;
+}
+
+@keyframes rotateScan {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(90deg); }
+    50% { transform: rotate(180deg); }
+    75% { transform: rotate(270deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.pulse-badge {
+    animation: badgePulse 2s infinite;
+}
+
+@keyframes badgePulse {
+    0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); }
+    70% { box-shadow: 0 0 0 6px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}

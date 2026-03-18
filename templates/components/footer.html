@@ -1,0 +1,23 @@
+<footer style="margin-top: auto; padding: 2rem; border-top: 1px solid rgba(85, 142, 185, 0.3); background: linear-gradient(135deg, var(--color-dark-primary) 0%, var(--color-blue-1) 100%);">
+    <div class="main-content-wrapper">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="color: rgba(245, 250, 255, 0.7); font-size: 0.9rem;">
+                <p style="margin: 0;">
+                    &copy; 2024 Leafora AI. Powered by AI.
+                </p>
+            </div>
+            <div style="display: flex; gap: 1.5rem;">
+                <a href="{{ url_for('supported_plants') }}" style="color: rgba(245, 250, 255, 0.8); text-decoration: none; font-size: 0.9rem; transition: var(--transition);" 
+                   onmouseover="this.style.color='var(--color-blue-3)'" 
+                   onmouseout="this.style.color='rgba(245, 250, 255, 0.8)'">
+                    <i class="bi bi-info-circle"></i> Supported Plants
+                </a>
+                <a href="#" style="color: rgba(245, 250, 255, 0.8); text-decoration: none; font-size: 0.9rem; transition: var(--transition);"
+                   onmouseover="this.style.color='var(--color-blue-3)'" 
+                   onmouseout="this.style.color='rgba(245, 250, 255, 0.8)'">
+                    <i class="bi bi-question-circle"></i> Help
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>

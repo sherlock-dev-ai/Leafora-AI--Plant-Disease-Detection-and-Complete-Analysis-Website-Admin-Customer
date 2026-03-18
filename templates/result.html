@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction Result - Leafora AI{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Result Header Card -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-{{ 'success' if disease == 'Healthy' else 'warning' }}">
+                    <h3 class="mb-0 text-white">🔍 Analysis Complete</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <!-- Image Column -->
+                        <div class="col-md-6 mb-4 mb-md-0">
+                            <h5 class="mb-3 text-center">📷 Uploaded Image</h5>
+                            <div class="text-center">
+                                <img src="{{ url_for('static', filename='uploads/' + filename) }}" 
+                                     alt="Analyzed Image" 
+                                     class="image-preview shadow-lg">
+                            </div>
+                        </div>
+                        
+                        <!-- Results Column -->
+                        <div class="col-md-6">
+                            <!-- Disease Result -->
+                            <div class="result-card mb-4">
+                                <div class="result-header">
+                                    <h5 class="text-muted mb-2">Predicted Disease</h5>
+                                    <div class="result-disease text-{{ 'success' if disease == 'Healthy' else 'warning' }}">
+                                        {{ disease }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Confidence -->
+                            <div class="mb-4">
+                                <h5 class="mb-3">Confidence Level</h5>
+                                <div class="progress mb-2" style="height: 35px;">
+                                    <div class="progress-bar bg-{{ 'success' if disease == 'Healthy' else 'warning' }}" 
+                                         role="progressbar" 
+                                         style="width: {{ confidence }}%"
+                                         aria-valuenow="{{ confidence }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        <strong>{{ "%.1f"|format(confidence) }}%</strong>
+                                    </div>
+                                </div>
+                                <p class="text-muted text-center mb-0">
+                                    <small>AI Confidence: {{ "%.1f"|format(confidence) }}%</small>
+                                </p>
+                            </div>
+                            
+                            <!-- Remedy -->
+                            <div class="remedy-box">
+                                <h5 class="mb-3">💡 Recommended Remedy</h5>
+                                <p class="mb-0">{{ remedy }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow border-0">
+                        <div class="card-body">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                <a href="{{ url_for('upload') }}" class="btn btn-success btn-lg me-md-2">
+                                    <span>📤</span> Upload Another Image
+                                </a>
+                                <a href="{{ url_for('history') }}" class="btn btn-outline-primary btn-lg me-md-2">
+                                    <span>📜</span> View History
+                                </a>
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-lg">
+                                    <span>🏠</span> Back to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow border-0 h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">📊 What This Means</h5>
+                            {% if disease == 'Healthy' %}
+                            <p class="text-success mb-0">
+                                <strong>Great news!</strong> Your crop appears to be healthy. Continue with regular care and monitoring to maintain plant health.
+                            </p>
+                            {% else %}
+                            <p class="text-warning mb-0">
+                                <strong>Disease Detected:</strong> {{ disease }} has been identified in your crop. Follow the recommended remedy above to treat the issue.
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow border-0 h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">🔬 About the Analysis</h5>
+                            <p class="text-muted mb-0">
+                                This prediction was generated using advanced deep learning algorithms trained on thousands of crop images. 
+                                For critical decisions, consider consulting with an agricultural expert.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Predictions -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow border-0">
+                        <div class="card-header bg-info text-white">
+                            <h4 class="mb-0">🏆 Top 5 Global Predictions</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                {% for pred in topk %}
+                                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h5 class="mb-1">{{ pred.label }}</h5>
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-robot"></i> Source: {{ pred.model_source }}
+                                        </small>
+                                    </div>
+                                    <div class="text-end" style="min-width: 150px;">
+                                        <div class="progress" style="height: 10px; margin-bottom: 5px;">
+                                            <div class="progress-bar bg-{{ 'success' if pred.confidence > 80 else 'warning' if pred.confidence > 50 else 'danger' }}" 
+                                                 role="progressbar" 
+                                                 style="width: {{ pred.confidence }}%">
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-{{ 'success' if pred.confidence > 80 else 'warning' if pred.confidence > 50 else 'danger' }}">
+                                            {{ "%.1f"|format(pred.confidence) }}%
+                                        </span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Model Analysis Table -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow border-0 mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">🧠 Full Model Analysis</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Model Source</th>
+                                            <th>Prediction</th>
+                                            <th>Confidence</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for model in all_models %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ model.model_source }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ model.model_name }}</small>
+                                            </td>
+                                            <td>
+                                                {% if model.topk and model.topk|length > 0 %}
+                                                    {{ model.topk[0].label }}
+                                                {% else %}
+                                                    <span class="text-muted">Unknown</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if model.topk and model.topk|length > 0 %}
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="progress flex-grow-1 me-2" style="height: 6px; width: 100px;">
+                                                            <div class="progress-bar bg-{{ 'success' if model.topk[0].confidence > 80 else 'warning' if model.topk[0].confidence > 50 else 'danger' }}" 
+                                                                 role="progressbar" 
+                                                                 style="width: {{ model.topk[0].confidence }}%">
+                                                            </div>
+                                                        </div>
+                                                        <span>{{ "%.1f"|format(model.topk[0].confidence) }}%</span>
+                                                    </div>
+                                                {% else %}
+                                                    <span class="text-muted">-</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if model.unknown %}
+                                                    <span class="badge bg-secondary">Unsure</span>
+                                                {% elif model.topk and model.topk|length > 0 and model.topk[0].confidence > 80 %}
+                                                    <span class="badge bg-success">High Confidence</span>
+                                                {% elif model.topk and model.topk|length > 0 and model.topk[0].confidence > 50 %}
+                                                    <span class="badge bg-warning text-dark">Moderate</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Low Confidence</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

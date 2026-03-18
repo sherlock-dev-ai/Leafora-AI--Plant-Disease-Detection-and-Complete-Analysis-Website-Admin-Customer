@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Server Management - Leafora AI{% endblock %}
+
+{% block content %}
+<style>
+    .server-title {
+        background: linear-gradient(90deg, #ffffff, #9ef7c8);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: titlePulse 2.8s ease-in-out infinite;
+    }
+
+    @keyframes titlePulse {
+        0%, 100% { filter: drop-shadow(0 0 3px rgba(158, 247, 200, 0.15)); }
+        50% { filter: drop-shadow(0 0 10px rgba(158, 247, 200, 0.45)); }
+    }
+
+    .option-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 0.9rem;
+    }
+
+    .option-card {
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.85rem;
+        background: rgba(255, 255, 255, 0.02);
+        transition: 0.2s ease;
+        min-height: 150px;
+    }
+
+    .option-card.current {
+        border-color: rgba(74, 222, 128, 0.85);
+        box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.35) inset;
+    }
+
+    .preview-box {
+        height: 54px;
+        border-radius: 10px;
+        margin-bottom: 0.65rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: radial-gradient(circle at 20% 20%, rgba(74, 222, 128, 0.28), rgba(255, 255, 255, 0.02) 55%, rgba(0, 0, 0, 0.45));
+        position: relative;
+        overflow: hidden;
+    }
+
+    .preview-box::before {
+        content: "";
+        position: absolute;
+        inset: -40% -10%;
+        background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+        animation: shimmer 2.2s linear infinite;
+    }
+
+    @keyframes shimmer {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(100%); }
+    }
+
+    .mini-dot {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #9ef7c8;
+        box-shadow: 0 0 10px rgba(158, 247, 200, 0.9);
+        animation: roam 3s ease-in-out infinite;
+    }
+
+    .mini-dot.two { top: 34px; left: 70%; animation-delay: 0.5s; }
+    .mini-dot.one { top: 12px; left: 14%; }
+
+    @keyframes roam {
+        0%, 100% { transform: translate(0, 0); opacity: 0.8; }
+        50% { transform: translate(16px, -8px); opacity: 1; }
+    }
+
+    .option-meta {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        line-height: 1.3;
+        min-height: 42px;
+    }
+</style>
+
+<div class="container-fluid" style="padding-top: 1rem; padding-left: 1.25rem; padding-right: 1rem;">
+    <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h1 class="h3 mb-1 server-title"><i class="bi bi-hdd-network"></i> Server Management</h1>
+            <p class="text-secondary mb-0">Configure cursor and page animation presets for admin selection.</p>
+        </div>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="card mb-4" style="background: var(--bg-card); border: 1px solid var(--border-color);">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h5 class="mb-0"><i class="bi bi-mouse2"></i> Cursor Animations</h5>
+                <span class="badge bg-success-subtle text-success border border-success-subtle">Current: {{ current_cursor }}</span>
+            </div>
+            <form method="post" action="{{ url_for('admin_system_logs', page=selected_page) }}">
+                <input type="hidden" name="action" value="save_cursor">
+                <div class="option-grid mb-3">
+                    {% for option in cursor_options %}
+                    <label class="option-card {% if option.id == current_cursor %}current{% endif %}">
+                        <input class="form-check-input mb-2" type="radio" name="cursor_animation" value="{{ option.id }}" {% if option.id == current_cursor %}checked{% endif %}>
+                        <div class="preview-box">
+                            <span class="mini-dot one"></span>
+                            <span class="mini-dot two"></span>
+                        </div>
+                        <div class="fw-semibold text-light small mb-1">{{ option.name }}</div>
+                        <div class="option-meta">{{ option.description }}</div>
+                    </label>
+                    {% endfor %}
+                </div>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Save Cursor Choice</button>
+                <span class="ms-2 text-secondary small">Stored only in admin settings for now.</span>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4" style="background: var(--bg-card); border: 1px solid var(--border-color);">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h5 class="mb-0"><i class="bi bi-stars"></i> Page Animations</h5>
+                <span class="badge bg-info-subtle text-info border border-info-subtle">Current: {{ current_page_animation }}</span>
+            </div>
+            <form method="get" action="{{ url_for('admin_system_logs') }}" class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+                <label class="text-secondary small mb-0" for="pagePicker">Select page:</label>
+                <select id="pagePicker" name="page" class="form-select" style="max-width: 280px;" onchange="this.form.submit()">
+                    {% for p in page_targets %}
+                    <option value="{{ p.id }}" {% if p.id == selected_page %}selected{% endif %}>{{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            <form method="post" action="{{ url_for('admin_system_logs', page=selected_page) }}">
+                <input type="hidden" name="action" value="save_page_animation">
+                <input type="hidden" name="selected_page" value="{{ selected_page }}">
+                <div class="option-grid mb-3">
+                    {% for option in page_animation_options %}
+                    <label class="option-card {% if option.id == current_page_animation %}current{% endif %}">
+                        <input class="form-check-input mb-2" type="radio" name="page_animation" value="{{ option.id }}" {% if option.id == current_page_animation %}checked{% endif %}>
+                        <div class="preview-box">
+                            <span class="mini-dot one"></span>
+                            <span class="mini-dot two"></span>
+                        </div>
+                        <div class="fw-semibold text-light small mb-1">{{ option.name }}</div>
+                        <div class="option-meta">{{ option.description }}</div>
+                    </label>
+                    {% endfor %}
+                </div>
+                <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Save Page Animation Choice</button>
+                <span class="ms-2 text-secondary small">Current option is shown first and highlighted.</span>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <div class="card" style="background: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="bi bi-activity"></i> Recent Predictions</h5>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped mb-0" style="--bs-table-bg: transparent; --bs-table-border-color: rgba(255,255,255,.1);">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>User</th>
+                                    <th>Result</th>
+                                    <th>Confidence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in recent_predictions %}
+                                <tr>
+                                    <td>{{ p.timestamp.strftime('%Y-%m-%d %H:%M:%S') if p.timestamp else 'N/A' }}</td>
+                                    <td>{{ p.user.username if p.user else 'N/A' }}</td>
+                                    <td>{{ p.result }}</td>
+                                    <td>{{ "%.1f"|format(p.confidence or 0) }}%</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-secondary">No recent predictions.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card" style="background: var(--bg-card); border: 1px solid var(--border-color);">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="bi bi-people"></i> Recent Users</h5>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped mb-0" style="--bs-table-bg: transparent; --bs-table-border-color: rgba(255,255,255,.1);">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in recent_users %}
+                                <tr>
+                                    <td>{{ u.username }}</td>
+                                    <td>{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else 'N/A' }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="2" class="text-center text-secondary">No recent users.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

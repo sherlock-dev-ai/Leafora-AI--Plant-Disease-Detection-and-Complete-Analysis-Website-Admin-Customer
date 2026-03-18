@@ -1,0 +1,88 @@
+<aside class="sidebar" id="sidebar">
+    <!-- Main Navigation -->
+    <nav class="sidebar-nav">
+        {% if not session.is_admin %}
+        <!-- Member-only navigation -->
+        <a href="{{ url_for('dashboard') }}" 
+           class="sidebar-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+        
+        <a href="{{ url_for('upload') }}" 
+           class="sidebar-item {% if request.endpoint == 'upload' %}active{% endif %}">
+            <i class="bi bi-cloud-upload"></i>
+            <span>Upload</span>
+        </a>
+        
+        <a href="{{ url_for('history') }}" 
+           class="sidebar-item {% if request.endpoint == 'history' %}active{% endif %}">
+            <i class="bi bi-clock-history"></i>
+            <span>History</span>
+        </a>
+        
+        <a href="{{ url_for('profile') }}" 
+           class="sidebar-item {% if request.endpoint == 'profile' %}active{% endif %}">
+            <i class="bi bi-person"></i>
+            <span>Profile</span>
+        </a>
+        
+        <a href="{{ url_for('plans') }}" 
+           class="sidebar-item {% if request.endpoint == 'plans' %}active{% endif %}">
+            <i class="bi bi-star"></i>
+            <span>Plans</span>
+        </a>
+        {% endif %}
+
+        {% if session.is_admin %}
+        <!-- Admin Section -->
+        <div class="sidebar-section" style="margin-top: 0.25rem;">
+            <div class="sidebar-section-label" style="padding: 0.25rem 1.15rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); font-weight: 600;">Admin</div>
+            
+            <a href="{{ url_for('admin_dashboard') }}" 
+               class="sidebar-item {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                <i class="bi bi-shield-check"></i>
+                <span>Admin Panel</span>
+            </a>
+            
+            <a href="{{ url_for('admin_users') }}" 
+               class="sidebar-item {% if request.endpoint == 'admin_users' %}active{% endif %}">
+                <i class="bi bi-people"></i>
+                <span>Users</span>
+            </a>
+            
+            <a href="{{ url_for('admin_predictions') }}" 
+               class="sidebar-item {% if request.endpoint == 'admin_predictions' %}active{% endif %}">
+                <i class="bi bi-graph-up"></i>
+                <span>Predictions</span>
+            </a>
+            
+            <a href="{{ url_for('admin_payments') }}" 
+               class="sidebar-item {% if request.endpoint == 'admin_payments' %}active{% endif %}">
+                <i class="bi bi-credit-card"></i>
+                <span>Payments</span>
+            </a>
+            
+            <a href="{{ url_for('admin_notifications') }}" 
+               class="sidebar-item {% if request.endpoint == 'admin_notifications' %}active{% endif %}">
+                <i class="bi bi-bell"></i>
+                <span>Notifications</span>
+            </a>
+            
+            <a href="{{ url_for('admin_system_logs') }}"
+               class="sidebar-item {% if request.endpoint == 'admin_system_logs' %}active{% endif %}">
+                <i class="bi bi-hdd-network"></i>
+                <span>Server Management</span>
+            </a>
+        </div>
+        {% endif %}
+    </nav>
+
+    <!-- Footer - Logout -->
+    <div class="sidebar-footer" style="margin-top: auto; padding-top: 1rem;">
+        <a href="{{ url_for('logout') }}" class="sidebar-item">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+        </a>
+    </div>
+</aside>

@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Payments - Admin - Leafora AI{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-payments-page {
+    --muted: rgba(255, 255, 255, 0.78);
+    --line: rgba(255, 255, 255, 0.1);
+    padding-top: 1.1rem;
+    padding-left: 1.25rem;
+    padding-right: 1rem;
+}
+
+.admin-page-header {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: var(--shadow-md);
+    padding: 1.1rem 1.2rem;
+}
+
+.admin-page-title {
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+}
+
+.admin-page-subtitle {
+    color: var(--muted);
+    margin-bottom: 0;
+}
+
+.admin-controls {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.admin-controls .form-control {
+    background: rgba(0, 0, 0, 0.35);
+    border-color: var(--line);
+    color: var(--text-primary);
+}
+
+.admin-controls .customer-input {
+    max-width: 160px;
+}
+
+.admin-controls .date-input {
+    max-width: 180px;
+}
+
+.admin-controls .btn {
+    padding: 0.6rem 0.85rem;
+}
+
+.section-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: var(--shadow-md);
+}
+
+.section-card .card-body {
+    padding: 1rem;
+}
+
+.admin-table {
+    --bs-table-bg: transparent;
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.03);
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.06);
+    --bs-table-border-color: var(--line);
+    margin-bottom: 0;
+}
+
+.admin-table thead th {
+    color: rgba(255, 255, 255, 0.86);
+    font-weight: 600;
+}
+
+.admin-table td,
+.admin-table th {
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.admin-table .muted {
+    color: var(--muted);
+}
+
+.admin-table code {
+    color: #a5effe;
+    background: rgba(165, 239, 254, 0.12);
+    padding: 0.15rem 0.35rem;
+    border-radius: 4px;
+}
+
+.badge-status {
+    border-radius: 999px;
+    font-size: 0.78rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid transparent;
+}
+
+.badge-completed {
+    background: rgba(34, 197, 94, 0.2);
+    color: #86efac;
+    border-color: rgba(34, 197, 94, 0.38);
+}
+
+.badge-pending {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    border-color: rgba(245, 158, 11, 0.38);
+}
+
+.badge-refunded {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.38);
+}
+
+.badge-default {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--muted);
+    padding: 2.5rem 1rem;
+}
+
+@media (max-width: 991px) {
+    .admin-payments-page {
+        padding-top: 0.5rem;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .admin-page-header {
+        padding: 0.9rem;
+    }
+
+    .admin-controls .customer-input,
+    .admin-controls .date-input {
+        max-width: 150px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid admin-payments-page">
+    <div class="admin-page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="admin-page-title h3 d-flex align-items-center gap-2">
+                    <i class="bi bi-credit-card-2-front"></i>
+                    <span>Payment Management</span>
+                </h1>
+                <p class="admin-page-subtitle">View and filter payment records across the platform</p>
+            </div>
+            <form method="GET" class="admin-controls">
+                <input type="text" name="customer_id" class="form-control customer-input"
+                       placeholder="Customer ID" value="{{ search_customer }}">
+                <input type="date" name="start_date" value="{{ start_date }}" class="form-control date-input">
+                <input type="date" name="end_date" value="{{ end_date }}" class="form-control date-input">
+                <button type="submit" class="btn btn-outline">
+                    <i class="bi bi-funnel"></i>
+                    <span>Filter</span>
+                </button>
+                <a class="btn btn-outline" href="{{ url_for('admin_payments') }}">Clear</a>
+                <button type="submit" class="btn btn-outline" name="download_pdf" value="1">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                    <span>Download PDF</span>
+                </button>
+                <button type="submit" class="btn btn-primary" name="download" value="1">
+                    <i class="bi bi-download"></i>
+                    <span>Download CSV</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="section-card card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-dark table-striped table-hover admin-table">
+                    <thead>
+                        <tr>
+                            <th>Payment ID</th>
+                            <th>Customer</th>
+                            <th>Customer ID</th>
+                            <th>Amount</th>
+                            <th>Card</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Expires</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr>
+                            <td>#{{ payment.id }}</td>
+                            <td>
+                                <strong>{{ payment.user.username }}</strong><br>
+                                <small class="muted">{{ payment.user.email }}</small>
+                            </td>
+                            <td>
+                                <code>{{ payment.user.customer_id or 'N/A' }}</code>
+                            </td>
+                            <td>
+                                <strong>${{ "%.2f"|format(payment.amount_cents / 100) }}</strong>
+                                <small class="muted">{{ payment.currency }}</small>
+                            </td>
+                            <td>
+                                {% if payment.card_last4 %}
+                                **** **** **** {{ payment.card_last4 }}
+                                {% else %}
+                                <span class="muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.status == 'completed' %}
+                                <span class="badge-status badge-completed">Completed</span>
+                                {% elif payment.status == 'pending' %}
+                                <span class="badge-status badge-pending">Pending</span>
+                                {% elif payment.status == 'refunded' %}
+                                <span class="badge-status badge-refunded">Refunded</span>
+                                {% else %}
+                                <span class="badge-status badge-default">{{ payment.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ (payment.created_at or payment.payment_date).strftime('%Y-%m-%d %H:%M') if (payment.created_at or payment.payment_date) else 'N/A' }}
+                            </td>
+                            <td>
+                                {% if payment.subscription and payment.subscription.pro_expires_at %}
+                                {{ payment.subscription.pro_expires_at.strftime('%Y-%m-%d') }}
+                                {% else %}
+                                <span class="muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.receipt_path %}
+                                <a href="{{ url_for('download_receipt', payment_id=payment.id) }}"
+                                   class="btn btn-sm btn-outline"
+                                   title="Download Receipt">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                                {% else %}
+                                <span class="muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="empty-state">
+                                No payments found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

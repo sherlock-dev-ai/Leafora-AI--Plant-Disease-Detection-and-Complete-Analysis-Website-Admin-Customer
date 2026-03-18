@@ -1,0 +1,457 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Result - Leafora AI{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simple intersection observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.animate-up').forEach((el, index) => {
+            el.style.animationDelay = `${index * 0.1}s`;
+            observer.observe(el);
+        });
+
+        // Initialize progress bars from data-width attribute to avoid Jinja2 linter errors
+        document.querySelectorAll('[data-width]').forEach(el => {
+            el.style.width = el.getAttribute('data-width');
+        });
+
+        document.querySelectorAll('.disease-spot-box').forEach(el => {
+            const x = parseFloat(el.getAttribute('data-x'));
+            const y = parseFloat(el.getAttribute('data-y'));
+            const w = parseFloat(el.getAttribute('data-w'));
+            const h = parseFloat(el.getAttribute('data-h'));
+            if (!isNaN(x)) el.style.left = `${x}%`;
+            if (!isNaN(y)) el.style.top = `${y}%`;
+            if (!isNaN(w)) el.style.width = `${w}%`;
+            if (!isNaN(h)) el.style.height = `${h}%`;
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+{% set placeholder_img = url_for('static', filename='images/placeholder_leaf.png') %}
+<style>
+    :root {
+        --glass-bg: rgba(20, 20, 30, 0.75);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --primary-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --danger-gradient: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%);
+        --warning-gradient: linear-gradient(135deg, #fce38a 0%, #f38181 100%);
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 30px, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+    
+    .animate-up {
+        opacity: 0;
+        animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+    
+    .card {
+        backdrop-filter: blur(16px);
+        background: var(--glass-bg) !important;
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        border-radius: 16px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .scan-line {
+        animation: scan 2s linear infinite;
+        background: linear-gradient(to bottom, transparent, var(--bs-primary), transparent);
+    }
+    
+    @keyframes scan {
+        0% { top: -10%; opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { top: 110%; opacity: 0; }
+    }
+
+    .progress {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .list-group-item {
+        transition: background-color 0.2s ease;
+    }
+    
+    .list-group-item:hover {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    .badge-soft {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .text-gradient-primary {
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .bg-gradient-primary {
+        background: var(--primary-gradient) !important;
+    }
+
+    /* USER REQUESTED FIX FOR IMAGE STRETCHING */
+    .result-image-wrapper {
+        width: 100%;
+        max-width: 420px;
+        aspect-ratio: 4 / 3;
+        overflow: hidden;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .result-image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .result-image-wrapper img.non-plant-image {
+        filter: grayscale(100%) contrast(1.1) brightness(0.6);
+    }
+    .disease-spot-box {
+        position: absolute;
+        border: 2px solid rgba(255, 99, 132, 0.9);
+        box-shadow: 0 0 10px rgba(255, 99, 132, 0.8);
+        pointer-events: none;
+        border-radius: 4px;
+    }
+
+    .disease-profile-card {
+        background: rgba(13, 16, 24, 0.85) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .disease-grid-item {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 1rem;
+        height: 100%;
+    }
+
+    .disease-grid-item h6 {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.65rem;
+        color: #8fd8ff;
+    }
+
+    .disease-grid-item ul {
+        margin-bottom: 0;
+        padding-left: 1rem;
+    }
+
+    .disease-grid-item li {
+        color: rgba(255, 255, 255, 0.92);
+        margin-bottom: 0.4rem;
+        line-height: 1.5;
+    }
+
+    .disease-tag {
+        background: rgba(56, 239, 125, 0.1);
+        border: 1px solid rgba(56, 239, 125, 0.4);
+        color: #b4ffda;
+        font-size: 0.74rem;
+        padding: 0.3rem 0.6rem;
+        border-radius: 999px;
+    }
+</style>
+
+<!-- Leaf Animation Canvas -->
+<canvas id="heroCanvas" class="position-absolute top-0 start-0 w-100 h-100" style="z-index: -1;" data-particle-theme="leaf" data-no-lines></canvas>
+
+<div class="container py-5" id="result-container">
+    <!-- Header with AI Status -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5 animate-up">
+        <div class="mb-3 mb-md-0">
+            <h6 class="text-uppercase text-info mb-1" id="ai-status-text">
+                <i class="bi bi-cpu-fill me-2"></i>Analysis Complete
+            </h6>
+            <div class="d-flex align-items-center gap-3">
+                <h2 class="display-5 fw-bold mb-0 text-white">Diagnostic Report</h2>
+                <div class="spinner-grow text-primary spinner-grow-sm" role="status">
+                    <span class="visually-hidden">Active</span>
+                </div>
+            </div>
+        </div>
+        <div class="text-end">
+            <div class="badge bg-dark bg-opacity-50 border border-secondary px-4 py-2 rounded-pill fs-6 shadow-sm">
+                <i class="bi bi-qr-code me-2 text-info"></i>ID: <span class="font-monospace">{{ prediction_id|default('N/A') }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-5 animate-up">
+        <h4 class="text-white mb-4 border-bottom border-secondary pb-2">1. Visual Analysis</h4>
+        {% if is_non_plant %}
+        <div class="d-flex flex-column align-items-center">
+            <div class="result-image-wrapper">
+                {% if filename %}
+                <img src="{{ url_for('static', filename='uploads/' + filename) }}" 
+                     alt="Analyzed Crop" 
+                     id="scan-image"
+                     class="non-plant-image"
+                     onerror="this.onerror=null;this.src='{{ placeholder_img }}';">
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        {% set is_healthy = 'healthy' in label.lower() %}
+        {% set status_color = 'success' if is_healthy else 'danger' %}
+        {% set status_icon = 'check-circle-fill' if is_healthy else 'exclamation-triangle-fill' %}
+        <div class="row g-4 align-items-start">
+            <div class="col-lg-5 d-flex justify-content-center">
+                <div class="result-image-wrapper">
+                    {% if filename %}
+                    <img src="{{ url_for('static', filename='uploads/' + filename) }}" 
+                         alt="Analyzed Crop" 
+                         id="scan-image"
+                         onerror="this.onerror=null;this.src='{{ placeholder_img }}';">
+                    {% endif %}
+                    <div class="scan-line position-absolute w-100" style="height: 2px; background: #00ff00; box-shadow: 0 0 10px #00ff00; z-index: 10;"></div>
+                    {% if disease_spots %}
+                        {% for spot in disease_spots %}
+                        <div class="disease-spot-box"
+                             data-x="{{ spot.x }}"
+                             data-y="{{ spot.y }}"
+                             data-w="{{ spot.w }}"
+                             data-h="{{ spot.h }}"></div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="card position-relative overflow-hidden border-{{ status_color }} mb-4" style="border-width: 0 0 0 4px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-{{ status_color }} bg-opacity-10 text-{{ status_color }} border border-{{ status_color }} px-3 py-1 rounded-pill">
+                                Primary Result
+                            </span>
+                            <span class="ms-auto text-muted small"><i class="bi bi-cpu me-1"></i>{{ model_used|default('Ensemble') }}</span>
+                        </div>
+                        <h1 class="display-5 fw-bold text-white mb-2">{{ label }}</h1>
+                        <p class="text-{{ status_color }} fs-5 mb-0">
+                            <i class="bi bi-{{ status_icon }} me-2"></i>
+                            {% if is_healthy %}
+                                Plant appears healthy and vigorous.
+                            {% else %}
+                                Pathogen signatures detected requiring attention.
+                            {% endif %}
+                        </p>
+                        <div class="mt-4 d-flex align-items-baseline gap-3">
+                            <div class="display-5 fw-bold text-white">{{ "%.1f"|format(confidence) }}<span class="fs-5">%</span></div>
+                            <div class="text-muted text-uppercase small letter-spacing-1">Confidence Score</div>
+                        </div>
+                    </div>
+                </div>
+                {% if disease_profile %}
+                <div class="card disease-profile-card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                            <h5 class="text-info mb-0">Disease Description</h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="disease-tag">Crop: {{ disease_profile.crop }}</span>
+                                <span class="disease-tag">Type: {{ disease_profile.pathogen_type }}</span>
+                                <span class="disease-tag">Risk: {{ disease_profile.risk_level }}</span>
+                            </div>
+                        </div>
+                        <p class="mb-3 text-light opacity-90" style="line-height: 1.7;">
+                            {{ disease_profile.summary }}
+                        </p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="disease-grid-item">
+                                    <h6><i class="bi bi-search me-1"></i>Symptoms to Watch</h6>
+                                    <ul>
+                                        {% for symptom in disease_profile.symptoms %}
+                                        <li>{{ symptom }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="disease-grid-item">
+                                    <h6><i class="bi bi-heart-pulse me-1"></i>Likely Impact</h6>
+                                    <p class="mb-0 text-light opacity-90" style="line-height: 1.65;">
+                                        {{ disease_profile.impact }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="disease-grid-item">
+                                    <h6><i class="bi bi-shield-check me-1"></i>Recommended Field Actions</h6>
+                                    <ul>
+                                        {% for action in disease_profile.actions %}
+                                        <li>{{ action }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% elif disease_description %}
+                <div class="card disease-profile-card mb-3">
+                    <div class="card-body">
+                        <h5 class="text-info mb-2">Disease Description</h5>
+                        <p class="mb-0 text-light opacity-90" style="line-height: 1.7;">
+                            {{ disease_description }}
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% if kindwise_results and kindwise_results|length > 0 %}
+        {% set k_res = kindwise_results[0] %}
+        <div class="mt-4 p-4 card border-secondary text-white position-relative w-100">
+            <h5 class="border-bottom border-secondary pb-2 mb-3 text-info">
+                <i class="bi bi-file-earmark-medical me-2"></i>External Verification Report
+            </h5>
+            <div class="row g-3">
+                <div class="col-6">
+                    <small class="text-muted d-block text-uppercase" style="font-size: 0.7rem;">API Provider</small>
+                    <span class="fw-bold">Kindwise Crop Health</span>
+                </div>
+                <div class="col-6">
+                    <small class="text-muted d-block text-uppercase" style="font-size: 0.7rem;">Timestamp</small>
+                    <span class="font-monospace small">{{ k_res.details.timestamp|default('Just now') }}</span>
+                </div>
+                <div class="col-12">
+                     <small class="text-muted d-block text-uppercase" style="font-size: 0.7rem;">Model Sources Used</small>
+                     {% if k_res.details and k_res.details.model_sources_used %}
+                        {% for src in k_res.details.model_sources_used %}
+                            <span class="badge bg-secondary me-1">{{ src }}</span>
+                        {% endfor %}
+                     {% else %}
+                        <span class="badge bg-secondary">Kindwise Crop Health API</span>
+                        <span class="badge bg-secondary">Similar Images Database</span>
+                     {% endif %}
+                </div>
+                <div class="col-12 pt-2">
+                    <div class="p-3 bg-black bg-opacity-25 rounded border border-secondary border-opacity-25">
+                         <div class="d-flex justify-content-between align-items-center">
+                             <span>Detected: <strong class="text-warning">{{ k_res.disease }}</strong></span>
+                             <span class="badge bg-info">{{ "%.1f"|format(k_res.confidence) }}% Match</span>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="disease-results">
+        {% if is_non_plant %}
+        <div class="mb-5 animate-up">
+            <h4 class="text-white mb-4 border-bottom border-secondary pb-2">2. Result</h4>
+            <div class="card position-relative overflow-hidden border-warning" style="border-width: 0 0 0 4px;">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning px-3 py-1 rounded-pill">
+                                    Not a plant image
+                                </span>
+                            </div>
+                            <h1 class="display-5 fw-bold text-white mb-2">No plant leaf detected</h1>
+                            <p class="text-warning fs-5 mb-0">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                Please upload a clear image of a single plant leaf for disease analysis.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center mt-4 mt-md-0">
+                            <div class="display-1 fw-bold text-white">
+                                {{ "%.1f"|format(non_leaf_confidence|default(confidence)) }}<span class="fs-4">%</span>
+                            </div>
+                            <div class="text-muted text-uppercase small letter-spacing-1">Non-plant confidence</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="mb-5 animate-up">
+             <h4 class="text-white mb-4 border-bottom border-secondary pb-2">2. Top 5 Predictions</h4>
+             {% if topk %}
+             <div class="list-group">
+                {% for item in topk[:5] %}
+                <div class="list-group-item bg-dark bg-opacity-50 border-secondary mb-2 rounded d-flex justify-content-between align-items-center p-3">
+                    <div>
+                        <h5 class="mb-1 text-light">{{ item.label }}</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">
+                                <i class="bi bi-cpu me-1"></i>{{ item.model_source|default(item.model_name)|default('Unknown Model') }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="h4 fw-bold text-white mb-0">{{ "%.1f"|format(item.confidence) }}%</span>
+                    </div>
+                </div>
+                {% endfor %}
+             </div>
+             {% else %}
+             <p class="text-muted">No additional predictions available.</p>
+             {% endif %}
+        </div>
+
+        {% endif %}
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex flex-wrap gap-3 justify-content-center pb-5 animate-up">
+        <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-lg">
+            <i class="bi bi-upload me-2"></i>New Analysis
+        </a>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-lg rounded-pill px-4">
+            <i class="bi bi-grid me-2"></i>Dashboard
+        </a>
+        {% if prediction_id %}
+        <a href="{{ url_for('download_prediction_pdf', prediction_id=prediction_id) }}" class="btn btn-outline-light btn-lg rounded-pill px-4">
+            <i class="bi bi-file-earmark-pdf me-2"></i>Report
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

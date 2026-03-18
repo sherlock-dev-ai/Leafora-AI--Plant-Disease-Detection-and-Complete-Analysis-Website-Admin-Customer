@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Plans - Leafora AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid spacing-section">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="text-center mb-5">
+                <h1 class="mb-3">Choose Your Plan</h1>
+                <p class="text-secondary">Select the plan that best fits your needs</p>
+            </div>
+            
+            <div class="row g-4">
+                <!-- Free Plan -->
+                <div class="col-md-6">
+                    <div class="plan-card">
+                        <div class="mb-4">
+                            <h3 class="mb-2">Free</h3>
+                            <p class="text-secondary mb-0">Perfect for trying out Leafora AI</p>
+                        </div>
+                        <div class="mb-4">
+                            <div class="plan-price">$0</div>
+                            <p class="text-secondary">forever</p>
+                        </div>
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="bi bi-check-circle-fill text-green me-2 mt-1"></i>
+                                <span><strong>3 detections</strong> per day</span>
+                            </li>
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="bi bi-check-circle-fill text-green me-2 mt-1"></i>
+                                <span>Single model results</span>
+                            </li>
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="bi bi-check-circle-fill text-green me-2 mt-1"></i>
+                                <span>Basic disease identification</span>
+                            </li>
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="bi bi-check-circle-fill text-green me-2 mt-1"></i>
+                                <span>Top-5 predictions</span>
+                            </li>
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="bi bi-check-circle-fill text-green me-2 mt-1"></i>
+                                <span>Free Analysis</span>
+                            </li>
+                        </ul>
+                        {% if not is_pro %}
+                        <div class="mt-4">
+                            {% if usage_count >= 3 %}
+                                <div class="alert alert-warning text-center">
+                                    <i class="bi bi-exclamation-triangle"></i> Limit Reached
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info text-center">
+                                    <i class="bi bi-info-circle"></i> {{ 3 - usage_count }} detections remaining
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Pro Plan -->
+                <div class="col-md-6">
+                    <div class="plan-card featured">
+                        <div class="mb-3">
+                            <span class="badge-pro">RECOMMENDED</span>
+                        </div>
+                        <div class="mb-4">
+                            <h3 class="mb-2">Pro</h3>
+                            <p class="text-secondary mb-0">For serious plant disease detection</p>
+                        </div>
+                        <div class="mb-4">
+                            <div class="plan-price">₹1499</div>
+                            <p class="text-secondary">per month</p>
+                        </div>
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="bi bi-check-circle-fill text-green me-2 mt-1"></i>
+                                <span><strong>Unlimited</strong> detections</span>
+                            </li>
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="bi bi-check-circle-fill text-green me-2 mt-1"></i>
+                                <span><strong>Multi-model</strong> ensemble results</span>
+                            </li>
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="bi bi-check-circle-fill text-green me-2 mt-1"></i>
+                                <span>Per-model breakdown & analysis</span>
+                            </li>
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="bi bi-check-circle-fill text-green me-2 mt-1"></i>
+                                <span>Priority processing</span>
+                            </li>
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="bi bi-check-circle-fill text-green me-2 mt-1"></i>
+                                <span>Faster processing</span>
+                            </li>
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="bi bi-check-circle-fill text-green me-2 mt-1"></i>
+                                <span>Early feature access</span>
+                            </li>
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="bi bi-check-circle-fill text-green me-2 mt-1"></i>
+                                <span>Access Premium Model</span>
+                            </li>
+                        </ul>
+                        {% if is_pro %}
+                        <div class="mt-4">
+                            <div class="alert alert-success text-center">
+                                <i class="bi bi-check-circle"></i> You have Pro!
+                            </div>
+                            {% if user.pro_expires_at %}
+                            <p class="text-center text-secondary small mt-2">
+                                Expires: {{ user.pro_expires_at.strftime('%B %d, %Y') }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="mt-4">
+                            <a href="{{ url_for('subscribe', plan='pro') }}" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-star-fill"></i> Get Pro
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

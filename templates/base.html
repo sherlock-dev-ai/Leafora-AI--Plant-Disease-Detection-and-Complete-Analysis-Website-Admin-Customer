@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Leafora AI - AI Crop Disease Detection{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Leafora AI Future Theme -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.svg') }}" type="image/svg+xml">
+
+    {% block extra_css %}{% endblock %}
+    <style>
+        :root {
+            --sidebar-width: 80px;
+            --sidebar-width-expanded: 260px;
+            --navbar-height: 70px;
+            --primary-green: #4ade80;
+            --bg-dark: #000000;
+        }
+
+        html {
+            background-color: #000000;
+        }
+
+        body {
+            background-color: transparent !important;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        #global-canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        #heroCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            display: block !important;
+        }
+    </style>
+</head>
+<body data-auth="{{ 1 if session.user_id else 0 }}" class="{% if request.endpoint in ['index', 'login', 'register', 'demo_animations'] %}full-width{% endif %} {% if session.is_admin and request.endpoint not in ['index', 'login', 'register', 'demo_animations'] %}has-right-sidebar{% endif %} {% block body_class %}{% endblock %}">
+    <!-- Global Background Elements -->
+    <div id="global-canvas-container">
+        <canvas id="heroCanvas"></canvas>
+    </div>
+    <div class="bg-mesh"></div>
+
+    {% if request.endpoint not in ['index', 'login', 'register', 'demo_animations'] %}
+        {% include 'components/sidebar.html' %}
+        {% include 'components/sidebar_right.html' %}
+    {% endif %}
+
+    <!-- Top Navbar -->
+    {% block navbar %}
+        <div class="top-navbar-container" style="position: fixed; top: 0; z-index: 2000; width: 100%;">
+            {% include 'components/navbar.html' %}
+        </div>
+    {% endblock %}
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="main-content-wrapper" style="padding-top: 1rem;">
+                            {% for category, message in messages %}
+                                {% if "logged out" not in message.lower() and "welcome back" not in message.lower() %}
+                                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} fade-in glass" role="alert" style="margin-bottom: 1rem; border: 1px solid var(--glass-border);">
+                                        <strong>
+                                            <i class="bi bi-{{ 'exclamation-triangle' if category == 'danger' or category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }}"></i>
+                                        </strong>
+                                        {{ message }}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+        <!-- Page Content -->
+        <main class="main-content-wrapper">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        // Initialize global background animation if the canvas exists
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof window.initMovingDots === 'function') {
+                const canvas = document.getElementById('heroCanvas');
+                if (canvas) {
+                    console.log("BASE: Initializing global background animation...");
+                    window.initMovingDots('heroCanvas');
+                }
+            }
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

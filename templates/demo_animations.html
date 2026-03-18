@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}Professional Backgrounds - Leafora AI{% endblock %}
+
+{% block extra_css %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<style>
+    /* Reset & Layout */
+    body {
+        overflow: hidden; /* App-like feel */
+    }
+    
+    /* Override Base Wrapper */
+    .main-content-wrapper {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: none !important;
+        width: 100vw !important;
+        height: 100vh !important;
+    }
+
+    /* Layout Container: Split Screen */
+    .app-container {
+        display: flex;
+        width: 100vw;
+        height: calc(100vh - 60px); /* Subtract navbar height */
+        margin-top: 60px; /* Push down below navbar */
+        overflow: hidden;
+    }
+    
+    /* Left Sidebar: Controls */
+    .animation-sidebar {
+        width: 300px;
+        min-width: 300px;
+        background: #1e293b;
+        border-right: 1px solid rgba(255,255,255,0.1);
+        display: flex;
+        flex-direction: column;
+        z-index: 10;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.2);
+        height: 100%; /* Full height of container */
+    }
+    
+    /* Right Content: Canvas */
+    .preview-area {
+        flex-grow: 1;
+        position: relative;
+        background: #000;
+        overflow: hidden;
+        height: 100%;
+    }
+    
+    /* Sidebar Components */
+    .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .sidebar-content {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+    
+    /* Custom Scrollbar */
+    .sidebar-content::-webkit-scrollbar { width: 6px; }
+    .sidebar-content::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    .sidebar-content::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+    /* Category Headers */
+    .category-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: #94a3b8;
+        margin: 1.5rem 0 0.5rem 0.5rem;
+        font-weight: 700;
+    }
+    .category-label:first-child { margin-top: 0; }
+
+    /* Theme Buttons */
+    .theme-item {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        margin-bottom: 4px;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        color: #cbd5e1;
+        text-align: left;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+    }
+    
+    .theme-item:hover {
+        background: rgba(255,255,255,0.05);
+        color: #fff;
+    }
+    
+    .theme-item.active {
+        background: rgba(34, 197, 94, 0.1);
+        border-color: rgba(34, 197, 94, 0.2);
+        color: #4ade80;
+    }
+    
+    .theme-icon {
+        width: 24px;
+        display: flex;
+        justify-content: center;
+        margin-right: 12px;
+        opacity: 0.7;
+    }
+
+    /* Footer Hide */
+    footer { display: none !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-container">
+    <!-- LEFT PANEL: Selection -->
+    <div class="animation-sidebar">
+        <div class="sidebar-header">
+            <h5 class="text-white mb-0 fw-bold">Theme Studio v5 (Live)</h5>
+            <small class="text-muted">Professional Backgrounds (250+)</small>
+        </div>
+        
+        <div class="p-3 bg-dark bg-opacity-25 border-bottom border-white border-opacity-10">
+            <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" id="lineToggle" checked>
+                <label class="form-check-label text-sm text-gray-300" for="lineToggle">Show Connections</label>
+            </div>
+        </div>
+
+        <div class="sidebar-content" id="theme-list">
+            <!-- Injected via JS -->
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: Full Screen Preview -->
+    <div class="preview-area">
+        <canvas id="heroCanvas" class="w-100 h-100" data-particle-theme="whitewaves"></canvas>
+        
+        <!-- Overlay Info (Optional, non-intrusive) -->
+        <div class="position-absolute top-0 end-0 p-4 text-end pointer-events-none">
+            <h1 class="display-4 fw-bold text-white text-opacity-10" id="preview-title">White Waves</h1>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/landing.js') }}?v={{ range(1, 999999) | random }}&t=3"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const themeList = document.getElementById('theme-list');
+        const canvas = document.getElementById('heroCanvas');
+        const lineToggle = document.getElementById('lineToggle');
+        const previewTitle = document.getElementById('preview-title');
+        
+        // 1. Get Curated Themes from landing.js
+        const themes = window.curatedThemes || [];
+        
+        // 2. Group by Type for Sidebar
+        // Order: Particles, Waves, Grid, Spiral, Matrix, Tunnel
+        const typeOrder = ['particles', 'waves', 'grid', 'spiral', 'matrix', 'tunnel'];
+        const categories = {};
+        
+        themes.forEach(theme => {
+            if(!categories[theme.type]) categories[theme.type] = [];
+            categories[theme.type].push(theme);
+        });
+
+        // Icon Mapping
+        const typeIcons = {
+            'particles': 'bi-stars',
+            'waves': 'bi-soundwave',
+            'grid': 'bi-grid-3x3',
+            'spiral': 'bi-vinyl',
+            'matrix': 'bi-code-square',
+            'tunnel': 'bi-record-circle'
+        };
+
+        const typeLabels = {
+            'particles': 'Nature & Physics',
+            'waves': 'Flow & Frequency',
+            'grid': 'Perspective Grids',
+            'spiral': 'Hypnotic Spirals',
+            'matrix': 'Digital Rain',
+            'tunnel': 'Warp Tunnels'
+        };
+
+        let activeTheme = themes.length > 0 ? themes[0].id : 'default';
+
+        function renderSidebar() {
+            themeList.innerHTML = '';
+            
+            typeOrder.forEach(type => {
+                if(!categories[type]) return;
+                
+                // Category Header
+                const catHeader = document.createElement('div');
+                catHeader.className = 'category-label';
+                catHeader.textContent = typeLabels[type] || type.toUpperCase();
+                themeList.appendChild(catHeader);
+                
+                // Items
+                categories[type].forEach(theme => {
+                    const btn = document.createElement('button');
+                    btn.className = `theme-item ${theme.id === activeTheme ? 'active' : ''}`;
+                    btn.innerHTML = `
+                        <span class="theme-icon"><i class="bi ${typeIcons[type] || 'bi-box'}"></i></span>
+                        <span>${theme.name}</span>
+                    `;
+                    btn.onclick = () => selectTheme(theme);
+                    themeList.appendChild(btn);
+                });
+            });
+            
+            // Show count
+            console.log(`Loaded ${themes.length} curated themes.`);
+        }
+
+        function selectTheme(themeObj) {
+            activeTheme = themeObj.id;
+            
+            // Update UI
+            renderSidebar();
+            previewTitle.textContent = themeObj.name;
+            
+            // Update Canvas
+            canvas.setAttribute('data-particle-theme', themeObj.id);
+            if (window.initHeroCanvas) window.initHeroCanvas();
+        }
+
+        // Line Toggle
+        lineToggle.addEventListener('change', function() {
+            if(this.checked) {
+                canvas.removeAttribute('data-no-lines');
+            } else {
+                canvas.setAttribute('data-no-lines', '');
+            }
+            if (window.initHeroCanvas) window.initHeroCanvas();
+        });
+
+        // Init
+        renderSidebar();
+        
+        // Select first theme automatically
+        if(themes.length > 0) {
+            selectTheme(themes[0]);
+        }
+    });
+</script>
+{% endblock %}

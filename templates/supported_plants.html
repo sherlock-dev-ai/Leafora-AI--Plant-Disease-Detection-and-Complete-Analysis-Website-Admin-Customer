@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}Supported Plants - Leafora AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .supported-page-container {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+    .supported-title {
+        font-size: 2rem;
+        letter-spacing: 0.03em;
+    }
+    .supported-subtitle {
+        max-width: 640px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .supported-page-container .text-secondary {
+        color: rgba(209, 213, 219, 0.85);
+    }
+    .plan-card-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 0.75rem 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .plan-label {
+        font-size: 0.8rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 0.15rem 0.6rem;
+        border-radius: 999px;
+    }
+    .plan-label-basic {
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.5);
+        color: #bbf7d0;
+    }
+    .plan-label-pro {
+        background: rgba(250, 204, 21, 0.1);
+        border: 1px solid rgba(250, 204, 21, 0.6);
+        color: #fef3c7;
+    }
+    .plan-count-text {
+        font-size: 0.85rem;
+        color: rgba(249, 250, 251, 0.7);
+    }
+    .plant-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+    .plant-list li {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0;
+        color: var(--text);
+    }
+    .plant-dot-basic,
+    .plant-dot-pro,
+    .plant-dot-beta {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+    }
+    .plant-dot-basic {
+        background: #22c55e;
+    }
+    .plant-dot-pro {
+        background: #facc15;
+    }
+    .plant-dot-beta {
+        background: #f97316;
+    }
+    .beta-card {
+        border-radius: 16px;
+        border: 1px solid rgba(245, 158, 11, 0.6);
+    }
+    .beta-chip {
+        font-size: 0.8rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.6);
+        color: #fed7aa;
+    }
+    .beta-toggle-btn {
+        font-size: 0.8rem;
+        border-radius: 999px;
+        padding: 0.25rem 0.9rem;
+    }
+    @media (max-width: 768px) {
+        .supported-title {
+            font-size: 1.8rem;
+            letter-spacing: 0.04em;
+        }
+        .plan-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.4rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block navbar %}
+<!-- Navbar removed for this page as requested -->
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid spacing-section supported-page-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            {% set default_beta_plants = ['Orange', 'Rose', 'Strawberry', 'Sugercane'] %}
+            <div class="text-center mb-5">
+                <h1 class="mb-3 supported-title">Supported plants</h1>
+                <p class="text-secondary supported-subtitle">Crops currently available for disease detection in Leafora AI.</p>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="plan-card-header">
+                    <div>
+                        <span class="plan-label plan-label-basic">Basic plan</span>
+                    </div>
+                    <div class="plan-count-text">
+                        <i class="bi bi-check-circle"></i>
+                        {{ num_basic }} crops
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-white mb-3">Available on the free Basic plan.</p>
+                    {% if basic_plants %}
+                    <ul class="plant-list">
+                        {% for plant_name in basic_plants %}
+                        <li>
+                            <span class="plant-dot-basic"></span>
+                            <span class="text-white">{{ plant_name }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No plants available for Basic plan.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="plan-card-header">
+                    <div>
+                        <span class="plan-label plan-label-pro">
+                            <i class="bi bi-stars"></i>
+                            Pro plan
+                        </span>
+                    </div>
+                    <div class="plan-count-text">
+                        <i class="bi bi-star-fill"></i>
+                        {% set pro_display = pro_plants|default([]) %}
+                        {{ pro_display|length }} crops
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-white mb-3">Everything in Basic, plus additional crops from all models.</p>
+                    {% if pro_display %}
+                    <ul class="plant-list">
+                        {% for plant_name in pro_display %}
+                        <li>
+                            <span class="plant-dot-pro"></span>
+                            <span class="text-white">{{ plant_name }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No plants available for Pro plan.</p>
+                    {% endif %}
+                    {% if not session.user_id or not session.is_pro %}
+                    <div class="mt-4 text-center">
+                        <a href="{{ url_for('plans') }}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-star-fill"></i> Upgrade to Pro
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if model_supported_plants %}
+            <div class="card mt-4">
+                <div class="plan-card-header">
+                    <div>
+                        <span class="plan-label plan-label-basic">
+                            <i class="bi bi-cpu"></i>
+                            Model-wise support
+                        </span>
+                    </div>
+                    <div class="plan-count-text">
+                        <i class="bi bi-diagram-3"></i>
+                        {{ model_supported_plants|length }} models
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-white mb-3">Plants supported by each active disease model.</p>
+                    <div class="row g-3">
+                        {% for model in model_supported_plants %}
+                        <div class="col-md-6">
+                            <div class="p-3 rounded" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong class="text-white">{{ model.name }}</strong>
+                                    <span class="plan-count-text">{{ model.plants|length }} plants</span>
+                                </div>
+                                {% if model.plants %}
+                                <ul class="plant-list">
+                                    {% for plant_name in model.plants %}
+                                    <li>
+                                        <span class="plant-dot-basic"></span>
+                                        <span class="text-white">{{ plant_name }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <p class="text-muted mb-0">No plants detected for this model.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="beta-card mt-4 card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h4 class="mb-0 text-white">Beta section</h4>
+                            <p class="text-secondary mb-1 small">Pro users can optionally test beta diseases.</p>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="beta-chip">
+                                <i class="bi bi-flask me-1"></i>
+                                Experimental
+                            </span>
+                            <button type="button" class="btn btn-outline-warning beta-toggle-btn" id="betaToggle">
+                                <span class="beta-toggle-label-on">Hide beta</span>
+                                <span class="beta-toggle-label-off d-none">Show beta</span>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-white mb-3">These plants are currently in beta testing. Detection accuracy may vary.</p>
+                    <div id="betaContent">
+                        {% set plants = beta_plants|default(default_beta_plants) %}
+                        <ul class="plant-list">
+                            {% for plant_name in plants %}
+                            <li>
+                                <span class="plant-dot-beta"></span>
+                                <span class="text-white">{{ plant_name }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var toggleBtn = document.getElementById('betaToggle');
+    var betaContent = document.getElementById('betaContent');
+    if (!toggleBtn || !betaContent) return;
+    var labelOn = toggleBtn.querySelector('.beta-toggle-label-on');
+    var labelOff = toggleBtn.querySelector('.beta-toggle-label-off');
+    toggleBtn.addEventListener('click', function () {
+        var isHidden = betaContent.classList.contains('d-none');
+        if (isHidden) {
+            betaContent.classList.remove('d-none');
+            if (labelOn) labelOn.classList.remove('d-none');
+            if (labelOff) labelOff.classList.add('d-none');
+        } else {
+            betaContent.classList.add('d-none');
+            if (labelOn) labelOn.classList.add('d-none');
+            if (labelOff) labelOff.classList.remove('d-none');
+        }
+    });
+});
+</script>
+{% endblock %}

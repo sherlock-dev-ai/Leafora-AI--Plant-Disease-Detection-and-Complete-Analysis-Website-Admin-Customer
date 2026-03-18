@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Leafora AI - AI-Powered Disease Detection{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+{% endblock %}
+
+{% block body_class %}landing-page{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <canvas id="landingHeroCanvas" data-particle-theme="leaf"></canvas>
+    <div class="hero-overlay"></div>
+    
+    <div class="container hero-content">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0 animate-on-scroll">
+                <div class="glass-badge mb-3">
+                    <i class="bi bi-cpu-fill"></i> Leafora AI Live
+                </div>
+                <h1 class="hero-title">AI-Powered <br><span class="hero-highlight" id="typing-text">Disease Detection</span></h1>
+                <p class="lead text-muted mb-4" style="max-width: 500px;">
+                    Instantly identify plant diseases with 98% accuracy using our advanced deep learning models. Built for farmers, researchers, and smart agriculture.
+                </p>
+                <div class="d-flex gap-3 mb-5">
+                    {% if session.user_id %}
+                        <a href="{{ url_for('upload') }}" class="btn btn-glow btn-lg rounded-pill px-5">
+                            Analyze Now <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('register') }}" class="btn btn-glow btn-lg rounded-pill px-5">
+                            Start Free Analysis <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                        <a href="#how-it-works" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                            How It Works
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-lg-6 position-relative animate-on-scroll" style="transition-delay: 0.2s;">
+                <!-- Scanning Box Animation -->
+                <div class="glass-card p-0 overflow-hidden position-relative" style="animation: float 6s ease-in-out infinite;">
+                    {% set landing_diseases = top_detected_diseases or [] %}
+                    {% set live_data = has_live_top_data and (landing_diseases|length > 0) %}
+                    
+                    <!-- Header with AI Scan Animation -->
+                    <div class="p-3 border-bottom border-secondary bg-dark-glass d-flex justify-content-between align-items-center position-relative z-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-qr-code-scan me-2 text-success scanner-icon"></i>
+                            <span class="fw-bold ai-scan-text">Top Detected Diseases</span>
+                        </div>
+                        <span class="badge {% if live_data %}bg-success bg-opacity-10 text-success border border-success pulse-badge{% else %}bg-secondary bg-opacity-10 text-secondary border border-secondary{% endif %} d-flex align-items-center">
+                            <i class="bi {% if live_data %}bi-activity{% else %}bi-database-slash{% endif %} me-1"></i>
+                            {% if live_data %}Live Data{% else %}No Data{% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="position-relative">
+                        <!-- Gradient Background (Behind Text) -->
+                        <div class="position-absolute w-100 h-100" 
+                             style="z-index: 0; pointer-events: none; background: linear-gradient(to bottom, rgba(34, 197, 94, 0.1), transparent 20%); animation: scan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;">
+                        </div>
+
+                        <!-- Scan Line (Top Layer) -->
+                        <div class="position-absolute w-100 h-100" style="z-index: 2; pointer-events: none; overflow: hidden; top: 0; left: 0;">
+                            <div class="position-absolute w-100" 
+                                 style="height: 3px; background: #4ade80; box-shadow: 0 0 15px #4ade80, 0 0 30px #4ade80; top: 0; animation: scan 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;">
+                            </div>
+                        </div>
+
+                        <!-- List Items (Middle Layer) -->
+                        <div class="position-relative" style="z-index: 1;">
+                            {% for item in landing_diseases %}
+                                <div class="p-3 {% if not loop.last %}border-bottom border-secondary{% endif %} hover-bg-light-10 transition-all">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-{{ item.tone }} bg-opacity-10 p-2 me-3 text-{{ item.tone }}">
+                                            <i class="bi {{ item.icon }}"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <h6 class="mb-0 text-white">{{ item.label }}</h6>
+                                                <span class="text-{{ item.tone }} small fw-bold">{{ item.confidence }}%</span>
+                                            </div>
+                                            <div class="progress" style="height: 4px; background: rgba(255,255,255,0.1);">
+                                                <div class="progress-bar bg-{{ item.tone }} bar-fluctuate {{ item.bar_class }}" style="width: {{ item.confidence }}%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            {% if landing_diseases|length == 0 %}
+                                <div class="p-3 hover-bg-light-10 transition-all">
+                                    <div class="text-muted small">No disease data available yet.</div>
+                                </div>
+                            {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full-Width Moving Server Info Text below Hero -->
+    <div style="position: absolute; bottom: 0px; left: 0; width: 100%; overflow: hidden; white-space: nowrap; pointer-events: none; padding: 5px 0; z-index: 10;">
+        <div class="continuous-scroll" style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); font-family: monospace; letter-spacing: 2px; display: flex; width: fit-content;">
+            <div class="scroll-content">
+                <i class="bi bi-bullseye text-success"></i> ACCURACY: 98.2% &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="bi bi-shield-lock text-info"></i> SECURITY: END-TO-END &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="bi bi-activity text-warning"></i> STATUS: ACTIVE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="bi bi-layers text-primary"></i> CLASSES: 38+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="bi bi-tools text-danger"></i> TOOL: KERAS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </div>
+            <div class="scroll-content">
+                <i class="bi bi-bullseye text-success"></i> ACCURACY: 98.2% &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="bi bi-shield-lock text-info"></i> SECURITY: END-TO-END &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="bi bi-activity text-warning"></i> STATUS: ACTIVE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="bi bi-layers text-primary"></i> CLASSES: 38+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="bi bi-tools text-danger"></i> TOOL: KERAS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </div>
+            <div class="scroll-content">
+                <i class="bi bi-bullseye text-success"></i> ACCURACY: 98.2% &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="bi bi-shield-lock text-info"></i> SECURITY: END-TO-END &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="bi bi-activity text-warning"></i> STATUS: ACTIVE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="bi bi-layers text-primary"></i> CLASSES: 38+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="bi bi-tools text-danger"></i> TOOL: KERAS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .continuous-scroll {
+            display: flex;
+            animation: scrollContinuous 30s linear infinite;
+        }
+        .scroll-content {
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            padding-right: 0;
+        }
+        @keyframes scrollContinuous {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-33.33%); }
+        }
+    </style>
+</section>
+
+<!-- Scroll Storytelling Section -->
+<section id="features" class="py-3">
+    <div class="container py-3">
+        <div class="row mb-4 animate-on-scroll">
+            <div class="col-12 text-center mb-4">
+                <h2 class="display-5 fw-bold text-white">Why Choose Leafora AI?</h2>
+                <p class="text-muted">Powerful features for modern agriculture</p>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="glass-card h-100 text-center p-4">
+                    <div class="mb-4">
+                        <i class="bi bi-cpu fs-1 text-success"></i>
+                    </div>
+                    <h3 class="h4 text-white mb-3">AI Detection</h3>
+                    <p class="text-muted">Advanced deep learning models for accurate disease identification with high confidence levels.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="glass-card h-100 text-center p-4">
+                    <div class="mb-4">
+                        <i class="bi bi-lightning-charge fs-1 text-warning"></i>
+                    </div>
+                    <h3 class="h4 text-white mb-3">Instant Results</h3>
+                    <p class="text-muted">Get predictions in seconds. Upload an image and receive immediate analysis with detailed insights.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="glass-card h-100 text-center p-4">
+                    <div class="mb-4">
+                        <i class="bi bi-lightbulb fs-1 text-info"></i>
+                    </div>
+                    <h3 class="h4 text-white mb-3">Expert Remedies</h3>
+                    <p class="text-muted">Receive professional recommendations and treatment options for detected diseases.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Timeline -->
+<section id="how-it-works" class="pt-0 pb-3 position-relative" style="background: linear-gradient(to bottom, transparent, rgba(34, 197, 94, 0.05), transparent);">
+    <div class="container">
+        <div class="text-center mb-4 animate-on-scroll">
+            <h2 class="display-5 fw-bold text-white">How It Works</h2>
+            <p class="text-muted">Simple steps to protect your crops</p>
+        </div>
+        
+        <div class="timeline-steps animate-on-scroll">
+            <div class="step-item">
+                <div class="step-icon"><i class="bi bi-camera"></i></div>
+                <h4 class="h5 text-white">1. Snap</h4>
+                <p class="text-muted small">Take a clear photo of the leaf</p>
+            </div>
+            <div class="step-item">
+                <div class="step-icon"><i class="bi bi-cloud-upload"></i></div>
+                <h4 class="h5 text-white">2. Upload</h4>
+                <p class="text-muted small">Securely upload to our cloud</p>
+            </div>
+            <div class="step-item">
+                <div class="step-icon"><i class="bi bi-cpu-fill"></i></div>
+                <h4 class="h5 text-white">3. Analyze</h4>
+                <p class="text-muted small">AI detects pathogens instantly</p>
+            </div>
+            <div class="step-item">
+                <div class="step-icon"><i class="bi bi-clipboard-check"></i></div>
+                <h4 class="h5 text-white">4. Resolve</h4>
+                <p class="text-muted small">Get expert treatment plans</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Premium Pricing -->
+<section class="pt-0 pb-3 mb-3">
+    <div class="container">
+        <div class="text-center mb-4 animate-on-scroll">
+            <h2 class="display-5 fw-bold text-white">Simple Pricing</h2>
+            <p class="text-muted">Choose the plan that fits your farm</p>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-4 col-md-6 mb-4 animate-on-scroll">
+                <div class="glass-card h-100 p-4 transition-all hover-scale">
+                    <h3 class="text-white h4">Basic</h3>
+                    <div class="display-4 fw-bold text-white my-3">₹0</div>
+                    <p class="text-muted">Perfect for home gardeners</p>
+                    <ul class="list-unstyled text-muted my-4">
+                        <li class="mb-3 d-flex align-items-center"><i class="bi bi-check-circle-fill text-success me-3"></i> 3 Scans per day</li>
+                        <li class="mb-3 d-flex align-items-center"><i class="bi bi-check-circle-fill text-success me-3"></i> Basic Analysis</li>
+                        <li class="mb-3 d-flex align-items-center"><i class="bi bi-check-circle-fill text-success me-3"></i> Free Analysis</li>
+                    </ul>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-light w-100 rounded-pill mt-auto">Get Started</a>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4 animate-on-scroll" style="transition-delay: 0.1s;">
+                <div class="glass-card pricing-card pro h-100 position-relative p-4 transition-all hover-scale">
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <span class="badge-pro">RECOMMENDED</span>
+                    </div>
+                    <h3 class="text-white h4">Pro</h3>
+                    <div class="display-4 fw-bold text-white my-3">₹1499</div>
+                    <p class="text-muted">For professional farmers</p>
+                    <ul class="list-unstyled text-muted my-4">
+                        <li class="mb-3 d-flex align-items-center"><i class="bi bi-check-circle-fill text-success me-3"></i> <strong>Unlimited</strong> Scans</li>
+                        <li class="mb-3 d-flex align-items-center"><i class="bi bi-check-circle-fill text-success me-3"></i> Priority Processing</li>
+                        <li class="mb-3 d-flex align-items-center"><i class="bi bi-check-circle-fill text-success me-3"></i> Access Premium Model</li>
+                        <li class="mb-3 d-flex align-items-center"><i class="bi bi-check-circle-fill text-success me-3"></i> Export Reports (PDF)</li>
+                    </ul>
+                    <a href="{{ url_for('register') }}" class="btn btn-glow w-100 rounded-pill mt-auto">Get Pro</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+{% endblock %}

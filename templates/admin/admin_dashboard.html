@@ -1,0 +1,449 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Leafora AI{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-dashboard-page {
+    --text: var(--text-primary);
+    --green: var(--color-success);
+    --warning: var(--color-warning);
+    --danger: var(--color-danger);
+    --accent-orange: #f59e0b;
+    --bg-mist: rgba(255, 255, 255, 0.08);
+    padding-top: 1.4rem;
+    padding-left: 1.25rem;
+    padding-right: 1rem;
+}
+.admin-dashboard-page .dashboard-title {
+    color: var(--text-primary);
+    margin-bottom: 0.4rem;
+}
+.admin-dashboard-page .dashboard-subtitle {
+    color: rgba(255, 255, 255, 0.82) !important;
+}
+.admin-dashboard-page .text-secondary {
+    color: rgba(255, 255, 255, 0.78) !important;
+}
+.admin-stat-card {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    animation: dashboardFloat 6s ease-in-out infinite;
+}
+.admin-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border-accent);
+}
+.admin-stat-card::before {
+    content: "";
+    position: absolute;
+    inset: -40% -20%;
+    background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.06), transparent 45%);
+    animation: cardGlow 9s linear infinite;
+    pointer-events: none;
+}
+.admin-dashboard-page .row .col-md-3:nth-child(2) .admin-stat-card,
+.admin-dashboard-page .row .col-md-4:nth-child(2) .admin-stat-card {
+    animation-delay: 0.45s;
+}
+.admin-dashboard-page .row .col-md-3:nth-child(3) .admin-stat-card,
+.admin-dashboard-page .row .col-md-4:nth-child(3) .admin-stat-card {
+    animation-delay: 0.9s;
+}
+.admin-dashboard-page .row .col-md-3:nth-child(4) .admin-stat-card {
+    animation-delay: 1.35s;
+}
+@keyframes dashboardFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+@keyframes cardGlow {
+    0% { transform: translateX(-10%) translateY(-5%); }
+    50% { transform: translateX(8%) translateY(4%); }
+    100% { transform: translateX(-10%) translateY(-5%); }
+}
+.admin-stat-card .card-body {
+    padding: 0.85rem 0.85rem;
+    position: relative;
+    z-index: 1;
+}
+.admin-stat-card .stat-icon {
+    margin-bottom: 0.45rem !important;
+}
+.admin-stat-card .stat-icon i {
+    font-size: 1.35rem !important;
+}
+.admin-stat-card .stat-value {
+    font-size: 1.45rem !important;
+    line-height: 1.1;
+    color: var(--text-primary) !important;
+    margin-bottom: 0.3rem;
+}
+.admin-stat-card .stat-label {
+    font-size: 0.87rem;
+    color: rgba(255, 255, 255, 0.85) !important;
+    margin-bottom: 0;
+}
+.admin-dashboard-page .section-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 14px;
+    box-shadow: var(--shadow-md);
+}
+.admin-dashboard-page .section-card .card-header {
+    border-color: var(--border-color) !important;
+}
+.admin-dashboard-page .section-card .card-body,
+.admin-dashboard-page .section-card .card-title,
+.admin-dashboard-page .section-card h5,
+.admin-dashboard-page .section-card p,
+.admin-dashboard-page .section-card td,
+.admin-dashboard-page .section-card th {
+    color: var(--text-primary) !important;
+}
+.admin-dashboard-page .btn-outline-primary {
+    color: var(--text-primary);
+    border-color: var(--border-accent);
+    background: rgba(255, 255, 255, 0.04);
+}
+.admin-dashboard-page .btn-outline-primary:hover {
+    color: var(--bg-primary);
+    background: var(--accent);
+    border-color: var(--accent);
+}
+.admin-dashboard-page .table.table-dark {
+    --bs-table-bg: rgba(0, 0, 0, 0.24);
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.03);
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.06);
+    --bs-table-border-color: rgba(255, 255, 255, 0.1);
+}
+@media (max-width: 991px) {
+    .admin-dashboard-page {
+        padding-top: 0.65rem;
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid admin-dashboard-page">
+    <!-- Header -->
+    <div class="mb-4">
+        <h1 class="dashboard-title d-flex align-items-center gap-2">
+            <span class="rounded-circle d-inline-flex align-items-center justify-content-center"
+                  style="width: 40px; height: 40px; background: var(--accent-gradient);">
+                <i class="bi bi-shield-check"></i>
+            </span>
+            <span>Admin Dashboard</span>
+        </h1>
+        <p class="dashboard-subtitle mb-0">Monitor system statistics and manage the platform</p>
+    </div>
+
+    <!-- Main Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="card h-100 admin-stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon mb-3" style="color: var(--green);">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="stat-value">{{ total_users }}</div>
+                    <div class="stat-label" style="color: var(--text-secondary);">Total Users</div>
+                    <a href="{{ url_for('admin_users') }}" class="btn btn-outline-primary btn-sm mt-3">
+                        <i class="bi bi-arrow-right"></i> Manage
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="card h-100 admin-stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon mb-3" style="color: var(--green);">
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <div class="stat-value">{{ active_pro }}</div>
+                    <div class="stat-label" style="color: var(--text-secondary);">Active Pro Members</div>
+                    <div class="text-secondary small mt-2">Total Pro: {{ pro_members }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="card h-100 admin-stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon mb-3" style="color: var(--green);">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <div class="stat-value">{{ total_predictions }}</div>
+                    <div class="stat-label" style="color: var(--text-secondary);">Total Predictions</div>
+                    <a href="{{ url_for('admin_predictions') }}" class="btn btn-outline-primary btn-sm mt-3">
+                        <i class="bi bi-arrow-right"></i> View All
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="card h-100 admin-stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon mb-3" style="color: var(--accent-orange);">
+                        <i class="bi bi-credit-card"></i>
+                    </div>
+                    <div class="stat-value">&#8377;{{ "%.2f"|format(total_revenue_dollars) }}</div>
+                    <div class="stat-label" style="color: var(--text-secondary);">Total Revenue</div>
+                    <div class="text-secondary small mt-2">{{ total_payments }} payments</div>
+                    <a href="{{ url_for('admin_payments') }}" class="btn btn-outline-primary btn-sm mt-2">
+                        <i class="bi bi-arrow-right"></i> View Payments
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Stats Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4 col-sm-6">
+            <div class="card h-100 admin-stat-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-secondary mb-1">Expiring Pro (30 days)</h6>
+                            <div class="stat-value" style="color: var(--warning);">{{ expiring_pro }}</div>
+                        </div>
+                        <div class="stat-icon" style="color: var(--warning);">
+                            <i class="bi bi-exclamation-triangle" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 col-sm-6">
+            <div class="card h-100 admin-stat-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-secondary mb-1">Most Common Disease</h6>
+                            <div style="font-size: 1.05rem; font-weight: 600; color: var(--text);">
+                                {% if most_common_disease %}
+                                    {{ most_common_disease.split(' - ')[0] if ' - ' in most_common_disease else most_common_disease[:20] }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </div>
+                            {% if most_common_count %}
+                            <div class="text-secondary small mt-1">{{ most_common_count }} cases</div>
+                            {% endif %}
+                        </div>
+                        <div class="stat-icon" style="color: var(--danger);">
+                            <i class="bi bi-bug" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 col-sm-6">
+            <div class="card h-100 admin-stat-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-secondary mb-1">Uploaded Images</h6>
+                            <div class="stat-value">{{ uploaded_images_count }}</div>
+                        </div>
+                        <div class="stat-icon" style="color: var(--green);">
+                            <i class="bi bi-images" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Accuracy Report -->
+    {% if model_accuracy %}
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card section-card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0 text-white"><i class="bi bi-clipboard-data me-2"></i>Model Accuracy Report</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-dark table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Model / Dataset</th>
+                                    <th>Overall Rating</th>
+                                    <th>Critical Issues</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for key, data in model_accuracy.items() %}
+                                <tr>
+                                    <td><strong>{{ data.name }}</strong></td>
+                                    <td>
+                                        <span class="badge {% if 'Good' in data.overall_rating %}bg-success{% elif 'Poor' in data.overall_rating %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                            {{ data.overall_rating }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                            {% for detail in data.details %}
+                                                <div class="{% if 'High' in detail.accuracy or 'Good' in detail.accuracy or '100' in detail.accuracy %}text-success{% else %}text-danger{% endif %} small mb-1">
+                                                    <i class="bi {% if 'High' in detail.accuracy or 'Good' in detail.accuracy or '100' in detail.accuracy %}bi-check-circle-fill{% else %}bi-exclamation-circle-fill{% endif %} me-1"></i>
+                                                    {{ detail.class }}: <strong>{{ detail.accuracy }}</strong>
+                                                </div>
+                                            {% endfor %}
+                                        </td>
+                                    <td>
+                                        {% if 'Good' in data.overall_rating %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">Review Needed</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Admin Tools Section -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card section-card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0 text-white">
+                        <i class="bi bi-tools"></i> Admin Tools
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('admin_users') }}" class="btn btn-primary w-100">
+                                <i class="bi bi-people"></i> Manage Users
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('admin_predictions') }}" class="btn btn-primary w-100">
+                                <i class="bi bi-graph-up"></i> View All Predictions
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('admin_payments') }}" class="btn btn-primary w-100">
+                                <i class="bi bi-credit-card"></i> Payments
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('admin_model_performance') }}" class="btn btn-primary w-100">
+                                <i class="bi bi-speedometer2"></i> Model Performance
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('admin_model_management') }}" class="btn btn-primary w-100">
+                                <i class="bi bi-sliders"></i> Manage Models
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="{{ url_for('admin_system_logs') }}" class="btn btn-primary w-100">
+                                <i class="bi bi-file-text"></i> System Logs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Table -->
+    <div class="card section-card shadow-sm">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 text-white">
+                    <i class="bi bi-clock-history"></i> Recent Activity
+                </h5>
+                <a href="{{ url_for('admin_predictions') }}" class="btn btn-outline-primary btn-sm">
+                    View All <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if recent_predictions %}
+            <div class="table-responsive">
+                <table class="table table-dark table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Date</th>
+                            <th>Result</th>
+                            <th>Confidence</th>
+                            <th>Model</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pred in recent_predictions %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-mist d-flex align-items-center justify-content-center" 
+                                         style="width: 32px; height: 32px; font-size: 0.85rem; font-weight: 600; color: var(--green);">
+                                        {{ pred.user.username[:1] | upper }}
+                                    </div>
+                                    <span>{{ pred.user.username }}</span>
+                                </div>
+                            </td>
+                            <td class="text-secondary">
+                                {{ pred.timestamp.strftime('%Y-%m-%d %H:%M') }}
+                            </td>
+                            <td>
+                                <span class="badge {% if 'Healthy' in pred.result %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                    {{ pred.result }}
+                                </span>
+                            </td>
+                            <td>
+                                <span style="color: var(--green); font-weight: 600;">
+                                    {{ "%.1f"|format(pred.confidence) }}%
+                                </span>
+                            </td>
+                            <td class="text-secondary small">
+                                {% if pred.models_used %}
+                                    {% set models = pred.models_used|from_json %}
+                                    {% if models is iterable and models is not string %}
+                                        {{ models|join(', ') }}
+                                    {% else %}
+                                        {{ models if models else 'N/A' }}
+                                    {% endif %}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem;"></i>
+                <p class="text-secondary">No predictions yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Profile Settings - Leafora AI{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 1000px;">
+    <div class="mb-5">
+        <div class="card border-0 bg-transparent">
+            <div class="card-body px-0">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-8">
+                        <span class="profile-header-eyebrow text-secondary d-inline-flex align-items-center mb-2">
+                            <i class="bi bi-person-gear me-2 text-primary"></i>
+                            Account Management
+                        </span>
+                        <h1 class="profile-header-title fw-bold mb-1">
+                            Profile Settings
+                        </h1>
+                        <p class="profile-header-subtitle text-secondary mb-0">
+                            Update your details and preferences to keep your Leafora account in sync.
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill border border-success bg-secondary bg-opacity-10">
+                            <span class="position-relative d-flex" style="width: 10px; height: 10px;">
+                                <span class="position-relative w-100 h-100 rounded-circle bg-success"></span>
+                            </span>
+                            <span class="small fw-bold text-success text-nowrap">Secure Connection Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <!-- Left Sidebar: Identity & Stats -->
+            <div class="col-md-4">
+                <div class="card p-4 text-center mb-4 position-relative overflow-hidden">
+                    <div class="d-flex justify-content-center mb-3">
+                        <div class="rounded-circle p-1 border border-secondary position-relative profile-avatar-ring">
+                            {% if profile_image_url %}
+                            <img src="{{ profile_image_url }}" alt="Profile" class="rounded-circle w-100 h-100 object-fit-cover shadow-sm">
+                            {% else %}
+                            <div class="rounded-circle w-100 h-100 d-flex align-items-center justify-content-center bg-dark shadow-sm">
+                                <span class="display-4 fw-bold text-secondary">{{ user.username[:1] | upper }}</span>
+                            </div>
+                            {% endif %}
+                            <label for="profile_image" class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle d-flex align-items-center justify-content-center profile-avatar-edit">
+                                <i class="bi bi-camera-fill"></i>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <h4 class="fw-bold mb-1">{{ user.username }}</h4>
+                    <p class="text-secondary small mb-3">{{ user.email }}</p>
+                    
+                    <div class="d-inline-flex align-items-center px-3 py-1 rounded-pill border border-secondary bg-dark mb-4">
+                        {% if user.is_admin %}
+                            <i class="bi bi-shield-check text-danger me-2"></i>
+                            <span class="small fw-bold text-danger">Administrator</span>
+                        {% elif user.is_pro_active() %}
+                            <i class="bi bi-star-fill text-warning me-2"></i>
+                            <span class="small fw-bold text-warning">Pro Member</span>
+                        {% else %}
+                            <i class="bi bi-person text-info me-2"></i>
+                            <span class="small fw-bold text-info">Free Tier</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="row g-2 text-start">
+                        <div class="col-6">
+                            <div class="p-3 rounded-3 profile-stat-card h-100">
+                                <div class="profile-stat-label small mb-1">Joined</div>
+                                <div class="profile-stat-value fw-bold">{{ user.created_at.strftime('%b %Y') }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 rounded-3 profile-stat-card h-100">
+                                <div class="profile-stat-label small mb-1">Scans</div>
+                                <div class="profile-stat-value fw-bold">{{ total_predictions }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="card p-2 overflow-hidden d-none d-md-block">
+                    <div class="list-group list-group-flush bg-transparent">
+                        <a href="#" class="list-group-item list-group-item-action bg-transparent border-0 active fw-bold rounded-2 mb-1">
+                            <i class="bi bi-person-gear me-3 text-primary"></i>General Settings
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action bg-transparent border-0 text-secondary rounded-2 mb-1">
+                            <i class="bi bi-bell me-3"></i>Notifications
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action bg-transparent border-0 text-secondary rounded-2">
+                            <i class="bi bi-shield-lock me-3"></i>Security
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Content: Edit Form -->
+            <div class="col-md-8">
+                <div class="card p-5 h-100 position-relative">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-sliders me-2 text-primary"></i>Edit Information</h5>
+                    
+                    <form method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data" id="profileForm">
+                        <input type="file" id="profile_image" name="profile_image" accept="image/*" class="d-none" onchange="this.form.submit()">
+                        
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label for="username" class="form-label text-secondary small text-uppercase fw-bold">Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary text-secondary bg-transparent"><i class="bi bi-person"></i></span>
+                                    <input type="text" class="form-control border-secondary border-start-0 ps-2 profile-input" id="username" name="username" value="{{ user.username }}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label for="email" class="form-label text-secondary small text-uppercase fw-bold">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary text-secondary bg-transparent"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" class="form-control border-secondary border-start-0 ps-2 profile-input" id="email" name="email" value="{{ user.email }}" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-5">
+                                <h6 class="fw-bold mb-3 text-secondary border-bottom border-secondary pb-2">Preferences</h6>
+                                <div class="profile-toggle mb-3">
+                                    <label class="d-flex align-items-center gap-3 mb-0" for="emailNotif">
+                                        <input class="profile-toggle-input" type="checkbox" id="emailNotif" checked>
+                                        <span class="profile-toggle-switch">
+                                            <span class="profile-toggle-knob"></span>
+                                        </span>
+                                        <span class="profile-toggle-text">
+                                            Receive email notifications for analysis results
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="profile-toggle mb-3">
+                                    <label class="d-flex align-items-center gap-3 mb-0" for="marketingNotif">
+                                        <input class="profile-toggle-input" type="checkbox" id="marketingNotif">
+                                        <span class="profile-toggle-switch">
+                                            <span class="profile-toggle-knob"></span>
+                                        </span>
+                                        <span class="profile-toggle-text">
+                                            Subscribe to newsletter and updates
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-4 d-flex justify-content-end gap-3 pt-3 border-top border-secondary">
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary px-4">Cancel</a>
+                                <button type="submit" class="btn btn-primary px-4" id="saveBtn">
+                                    <i class="bi bi-save me-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .input-group-text {
+        border-right: none;
+    }
+    .form-control:focus {
+        border-color: var(--accent);
+        box-shadow: none;
+    }
+    .profile-header-eyebrow {
+        font-size: 0.75rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+    .profile-header-title {
+        font-size: clamp(1.8rem, 3vw, 2.4rem);
+    }
+    .profile-header-subtitle {
+        font-size: 0.9rem;
+        max-width: 420px;
+    }
+    .profile-avatar-ring {
+        width: 120px;
+        height: 120px;
+    }
+    .profile-avatar-edit {
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+    }
+    .profile-stat-card {
+        background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.22), rgba(15, 23, 42, 0.95));
+        border: 1px solid rgba(148, 163, 184, 0.55);
+        box-shadow: 0 18px 35px rgba(15, 23, 42, 0.75);
+    }
+    .profile-stat-label {
+        color: rgba(148, 163, 184, 0.9);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.7rem;
+    }
+    .profile-stat-value {
+        color: var(--color-soft-white);
+        font-size: 1.05rem;
+    }
+    .profile-input {
+        background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.95));
+        color: var(--color-soft-white);
+    }
+    .profile-input::placeholder {
+        color: rgba(148, 163, 184, 0.8);
+    }
+    .profile-toggle-input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+    .profile-toggle-switch {
+        width: 50px;
+        height: 26px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, rgba(15, 23, 42, 1), rgba(15, 23, 42, 1));
+        border: 1px solid rgba(148, 163, 184, 0.7);
+        display: inline-flex;
+        align-items: center;
+        padding: 2px;
+        position: relative;
+        transition: all 0.25s ease-out;
+        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.9);
+    }
+    .profile-toggle-knob {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, #f9fafb, #e5e7eb);
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.7);
+        transform: translateX(0);
+        transition: transform 0.22s cubic-bezier(0.22, 0.61, 0.36, 1), background 0.2s;
+    }
+    .profile-toggle-input:checked + .profile-toggle-switch {
+        background: linear-gradient(135deg, #0ea5e9, #22c55e);
+        border-color: transparent;
+        box-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
+    }
+    .profile-toggle-input:checked + .profile-toggle-switch .profile-toggle-knob {
+        transform: translateX(24px);
+        background: radial-gradient(circle at 30% 30%, #ecfeff, #e0f2fe);
+    }
+    .profile-toggle-text {
+        color: var(--color-soft-white);
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}

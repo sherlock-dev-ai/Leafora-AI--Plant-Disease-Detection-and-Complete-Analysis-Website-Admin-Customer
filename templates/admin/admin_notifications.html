@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - Admin - Leafora AI{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-notifications-page {
+    --muted: rgba(255, 255, 255, 0.78);
+    --line: rgba(255, 255, 255, 0.1);
+    padding-top: 1.1rem;
+    padding-left: 1.25rem;
+    padding-right: 1rem;
+}
+
+.admin-page-header {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: var(--shadow-md);
+    padding: 1.1rem 1.2rem;
+}
+
+.admin-page-title {
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+}
+
+.admin-page-subtitle {
+    color: var(--muted);
+    margin-bottom: 0;
+}
+
+.section-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: var(--shadow-md);
+}
+
+.section-card .card-header {
+    border-bottom: 1px solid var(--line);
+    color: var(--text-primary);
+}
+
+.section-card .card-body {
+    padding: 1rem;
+}
+
+.form-label {
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.form-control,
+.form-select {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--line);
+    color: var(--text-primary);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--border-accent);
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.08);
+}
+
+.form-select option {
+    background: #111;
+    color: #fff;
+}
+
+.admin-table {
+    --bs-table-bg: transparent;
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.03);
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.06);
+    --bs-table-border-color: var(--line);
+    margin-bottom: 0;
+}
+
+.admin-table thead th {
+    color: rgba(255, 255, 255, 0.86);
+    font-weight: 600;
+}
+
+.admin-table td,
+.admin-table th {
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.muted {
+    color: var(--muted);
+}
+
+.type-badge {
+    border-radius: 999px;
+    font-size: 0.76rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid transparent;
+    text-transform: capitalize;
+}
+
+.type-info {
+    background: rgba(59, 130, 246, 0.18);
+    color: #93c5fd;
+    border-color: rgba(59, 130, 246, 0.36);
+}
+
+.type-success {
+    background: rgba(34, 197, 94, 0.2);
+    color: #86efac;
+    border-color: rgba(34, 197, 94, 0.38);
+}
+
+.type-warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    border-color: rgba(245, 158, 11, 0.38);
+}
+
+.type-danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.38);
+}
+
+.type-default {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.all-users-badge {
+    background: rgba(165, 239, 254, 0.2);
+    color: #a5effe;
+    border: 1px solid rgba(165, 239, 254, 0.35);
+    border-radius: 999px;
+    font-size: 0.76rem;
+    padding: 0.3rem 0.6rem;
+}
+
+.message-row td {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--muted);
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--muted);
+    padding: 2.5rem 1rem;
+}
+
+@media (max-width: 991px) {
+    .admin-notifications-page {
+        padding-top: 0.5rem;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .admin-page-header {
+        padding: 0.9rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid admin-notifications-page">
+    <div class="admin-page-header mb-4">
+        <h1 class="admin-page-title h3 d-flex align-items-center gap-2">
+            <i class="bi bi-bell"></i>
+            <span>Notification Management</span>
+        </h1>
+        <p class="admin-page-subtitle">Send platform updates and review notification history</p>
+    </div>
+
+    <div class="section-card card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-send"></i>
+                <span>Send Notification</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('admin_notifications') }}">
+                <div class="mb-3">
+                    <label for="recipient_type" class="form-label">Recipient</label>
+                    <select class="form-select" id="recipient_type" name="recipient_type" required onchange="toggleUserSelect()">
+                        <option value="all">All Users</option>
+                        <option value="individual">Individual User</option>
+                    </select>
+                </div>
+
+                <div class="mb-3" id="userSelectGroup" style="display: none;">
+                    <label for="user_id" class="form-label">Select User</label>
+                    <select class="form-select" id="user_id" name="user_id">
+                        <option value="">-- Select User --</option>
+                        {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.username }} ({{ user.email }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" required maxlength="255" placeholder="Notification title">
+                </div>
+
+                <div class="mb-3">
+                    <label for="message" class="form-label">Message</label>
+                    <textarea class="form-control" id="message" name="message" rows="4" required placeholder="Notification message"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="type" class="form-label">Type</label>
+                    <select class="form-select" id="type" name="type" required>
+                        <option value="info">Info</option>
+                        <option value="success">Success</option>
+                        <option value="warning">Warning</option>
+                        <option value="danger">Danger</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-send"></i>
+                    <span>Send Notification</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="section-card card">
+        <div class="card-header">
+            <h5 class="mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-clock-history"></i>
+                <span>Notification History</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if notifications %}
+            <div class="table-responsive">
+                <table class="table table-dark table-striped table-hover admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Recipient</th>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>System</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for notification in notifications %}
+                        <tr>
+                            <td>{{ notification.id }}</td>
+                            <td>
+                                {% if notification.user_id %}
+                                    User #{{ notification.user_id }}
+                                {% else %}
+                                    <span class="all-users-badge">All Users</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ notification.title }}</td>
+                            <td>
+                                <span class="type-badge {% if notification.notification_type == 'info' %}type-info{% elif notification.notification_type == 'success' %}type-success{% elif notification.notification_type == 'warning' %}type-warning{% elif notification.notification_type == 'danger' %}type-danger{% else %}type-default{% endif %}">
+                                    {{ notification.notification_type }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if notification.is_system %}
+                                    <i class="bi bi-check-circle" style="color:#22c55e;"></i>
+                                {% else %}
+                                    <i class="bi bi-x-circle muted"></i>
+                                {% endif %}
+                            </td>
+                            <td>{{ notification.created_at.strftime('%Y-%m-%d %H:%M') if notification.created_at else 'N/A' }}</td>
+                        </tr>
+                        <tr class="message-row">
+                            <td colspan="6" class="small">
+                                <strong>Message:</strong> {{ notification.message }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="empty-state">No notifications sent yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleUserSelect() {
+    const recipientType = document.getElementById('recipient_type').value;
+    const userSelectGroup = document.getElementById('userSelectGroup');
+    const userSelect = document.getElementById('user_id');
+
+    if (recipientType === 'individual') {
+        userSelectGroup.style.display = 'block';
+        userSelect.required = true;
+    } else {
+        userSelectGroup.style.display = 'none';
+        userSelect.required = false;
+        userSelect.value = '';
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,26 @@
+Start import predict...
+DEBUG: predict.py loading...
+DEBUG: predict - os imported
+DEBUG: predict - json imported
+DEBUG: predict - logging imported
+DEBUG: predict - PIL imported
+DEBUG: predict - attempting numpy import
+DEBUG: predict - numpy imported
+DEBUG: predict - attempting requests import
+DEBUG: predict - requests imported
+DEBUG: predict - base64 imported
+DEBUG: predict - attempting cv2 import
+DEBUG: predict - cv2 imported
+DEBUG: predict - attempting base64 import
+DEBUG: predict - base64 imported
+DEBUG: predict - attempting torch import
+DEBUG: predict - torch imported
+DEBUG: predict - torchvision imported
+DEBUG: predict - torch check done
+Import predict took 10.0329 seconds
+SUCCESS: tensorflow is NOT loaded initially.
+Attempting to load premium model (should trigger TF load)...
+INFO - Monkey-patched deserialize_keras_object in 1 locations
+INFO - Applied Keras 3 compatibility patches for Initializers, Layers, and Deserialization
+Load premium model took 10.8322 seconds
+SUCCESS: tensorflow is loaded after model load.

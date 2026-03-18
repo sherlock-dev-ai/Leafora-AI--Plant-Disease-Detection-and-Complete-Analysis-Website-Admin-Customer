@@ -1,0 +1,492 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Leafora AI{% endblock %}
+
+{% block body_class %}landing-page{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300&display=swap");
+    
+    * {
+        font-family: "Quicksand", sans-serif;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background: #0a0a0a;
+        overflow-x: hidden;
+    }
+
+    /* Background Animation Elements (Optimized) */
+    .bg-animation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background: radial-gradient(circle at center, #111 0%, #000 100%);
+    }
+
+    .blob {
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        background: linear-gradient(45deg, rgba(34, 197, 94, 0.1), rgba(74, 222, 128, 0.05));
+        filter: blur(50px);
+        border-radius: 50%;
+        animation: moveBlob 20s infinite alternate ease-in-out;
+        will-change: transform;
+    }
+
+    .blob:nth-child(1) { top: -100px; left: -100px; animation-duration: 25s; }
+    .blob:nth-child(2) { 
+        bottom: -150px; 
+        right: -100px; 
+        background: linear-gradient(45deg, rgba(34, 197, 94, 0.08), rgba(59, 130, 246, 0.05));
+        animation-duration: 30s;
+        animation-delay: -5s;
+    }
+    .blob:nth-child(3) { 
+        top: 40%; 
+        left: 60%; 
+        width: 300px; 
+        height: 300px; 
+        background: linear-gradient(45deg, rgba(74, 222, 128, 0.05), rgba(34, 197, 94, 0.1));
+        animation-duration: 22s;
+        animation-delay: -10s;
+    }
+
+    @keyframes moveBlob {
+        0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+        33% { transform: translate3d(100px, 50px, 0) rotate(120deg) scale(1.1); }
+        66% { transform: translate3d(-50px, 150px, 0) rotate(240deg) scale(0.9); }
+        100% { transform: translate3d(0, 0, 0) rotate(360deg) scale(1); }
+    }
+
+    .dot {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: floatDot 15s infinite linear;
+        will-change: transform;
+    }
+
+    @keyframes floatDot {
+        0% { transform: translate3d(0, 100vh, 0); opacity: 0; }
+        10%, 90% { opacity: 1; }
+        100% { transform: translate3d(100px, -10vh, 0); opacity: 0; }
+    }
+
+    .register-container {
+        display: flex;
+        justify-content: center;
+        align-items: center; /* Center correctly */
+        min-height: 100vh;
+        width: 100%;
+        position: relative;
+        z-index: 1;
+        overflow-y: auto; /* Allow scrolling if needed */
+        padding: 20px 0;
+    }
+
+    /* Lines Animation Design - INDIVIDUAL WAVING */
+    .lines-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .line-box {
+        position: absolute;
+        transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1); /* Apple-style cubic-bezier */
+        will-change: top, left, width, height, transform;
+    }
+
+    .line-box i {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 2px solid #fff;
+        opacity: 0.15;
+        transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform, border-radius, border-color, filter;
+    }
+
+    /* Initial spread positions using the box */
+    .line-box:nth-child(1) { top: 10%; left: 10%; width: 300px; height: 300px; }
+    .line-box:nth-child(2) { top: 20%; right: 10%; left: auto; width: 400px; height: 400px; }
+    .line-box:nth-child(3) { bottom: 10%; left: 15%; width: 350px; height: 350px; }
+    .line-box:nth-child(4) { bottom: 20%; right: 15%; left: auto; width: 320px; height: 320px; }
+    .line-box:nth-child(5) { top: 40%; left: 50%; width: 450px; height: 450px; }
+    .line-box:nth-child(6) { top: 60%; left: 20%; width: 280px; height: 280px; }
+    .line-box:nth-child(7) { bottom: 30%; left: 40%; width: 380px; height: 380px; }
+    .line-box:nth-child(8) { top: 15%; left: 35%; width: 500px; height: 500px; }
+
+    /* EXACT Login Circles - Initial state is the same waving circle shape */
+    .line-box:nth-child(1) i { border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%; animation: wave1 15s infinite ease-in-out, lineGlow 8s infinite ease-in-out; }
+    .line-box:nth-child(2) i { border-radius: 41% 44% 56% 59% / 38% 62% 63% 37%; animation: wave2 18s infinite ease-in-out, lineGlow 8s infinite ease-in-out; animation-delay: 0s, 1s; }
+    .line-box:nth-child(3) i { border-radius: 41% 44% 56% 59% / 38% 62% 63% 37%; animation: wave3 20s infinite ease-in-out, lineGlow 8s infinite ease-in-out; animation-delay: 0s, 2s; }
+    
+    .line-box:nth-child(4) i { border-radius: 50%; animation: wave4 14s infinite ease-in-out, lineGlow 8s infinite ease-in-out; animation-delay: 0s, 3s; }
+    .line-box:nth-child(5) i { border-radius: 50%; animation: wave1 22s infinite ease-in-out, lineGlow 8s infinite ease-in-out; animation-delay: 0s, 4s; }
+    .line-box:nth-child(6) i { border-radius: 50%; animation: wave2 17s infinite ease-in-out, lineGlow 8s infinite ease-in-out; animation-delay: 0s, 5s; }
+    .line-box:nth-child(7) i { border-radius: 50%; animation: wave3 19s infinite ease-in-out, lineGlow 8s infinite ease-in-out; animation-delay: 0s, 6s; }
+    .line-box:nth-child(8) i { border-radius: 50%; opacity: 0.1; animation: wave4 21s infinite ease-in-out, lineGlow 8s infinite ease-in-out; animation-delay: 0s, 7s; }
+
+    @keyframes wave1 {
+        0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+        33% { transform: translate3d(50px, -40px, 0) rotate(120deg) scale(1.05); }
+        66% { transform: translate3d(-30px, 60px, 0) rotate(240deg) scale(0.95); }
+        100% { transform: translate3d(0, 0, 0) rotate(360deg) scale(1); }
+    }
+    @keyframes wave2 {
+        0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1.05); }
+        33% { transform: translate3d(-60px, 30px, 0) rotate(-120deg) scale(1); }
+        66% { transform: translate3d(40px, -50px, 0) rotate(-240deg) scale(1.1); }
+        100% { transform: translate3d(0, 0, 0) rotate(-360deg) scale(1.05); }
+    }
+    @keyframes wave3 {
+        0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(0.95); }
+        33% { transform: translate3d(40px, 50px, 0) rotate(120deg) scale(1.1); }
+        66% { transform: translate3d(-50px, -30px, 0) rotate(240deg) scale(1); }
+        100% { transform: translate3d(0, 0, 0) rotate(360deg) scale(0.95); }
+    }
+    @keyframes wave4 {
+        0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+        33% { transform: translate3d(-40px, -60px, 0) rotate(-120deg) scale(0.9); }
+        66% { transform: translate3d(60px, 40px, 0) rotate(-240deg) scale(1.05); }
+        100% { transform: translate3d(0, 0, 0) rotate(-360deg) scale(1); }
+    }
+
+    /* Glow effect */
+    @keyframes lineGlow {
+        0%, 80%, 100% { border-color: #fff; filter: none; opacity: 0.15; }
+        90% { border-color: #4ade80; filter: drop-shadow(0 0 20px rgba(74, 222, 128, 0.6)); opacity: 0.5; }
+    }
+
+    /* Morph to Login Circles - CONVERGE AND SPIN */
+    .morphing .line-box {
+        top: 50% !important;
+        left: 50% !important;
+        right: auto !important;
+        bottom: auto !important;
+        width: 500px !important;
+        height: 500px !important;
+        transform: translate3d(-50%, -50%, 0) !important;
+        z-index: 10;
+    }
+
+    .morphing .line-box i {
+        animation: none !important;
+        opacity: 1 !important;
+        border-color: #fff !important;
+        filter: none !important;
+        transform: translate3d(0, 0, 0) !important;
+    }
+
+    .morphing .line-box:nth-child(1) i {
+        border-radius: 38% 62% 63% 37% / 41% 44% 56% 59% !important;
+        animation: animate 6s linear infinite !important;
+    }
+    .morphing .line-box:nth-child(2) i {
+        border-radius: 41% 44% 56% 59% / 38% 62% 63% 37% !important;
+        animation: animate 4s linear infinite, colorChangeGreen 7s linear infinite !important;
+    }
+    .morphing .line-box:nth-child(3) i {
+        border-radius: 41% 44% 56% 59% / 38% 62% 63% 37% !important;
+        animation: animate2 10s linear infinite !important;
+    }
+    .morphing .line-box:nth-child(n+4) {
+        opacity: 0 !important;
+        transform: translate3d(-50%, -50%, 0) scale(0) !important;
+    }
+
+    @keyframes animate {
+        0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+        100% { transform: translate3d(0, 0, 0) rotate(360deg); }
+    }
+    @keyframes animate2 {
+        0% { transform: translate3d(0, 0, 0) rotate(360deg); }
+        100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+    }
+    @keyframes colorChangeGreen {
+        0%, 100% { border-color: #fff; }
+        50% { border-color: #4ade80; filter: drop-shadow(0 0 15px #4ade80); }
+    }
+
+    .register-form-box {
+        position: relative; /* Relative to container */
+        width: 650px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 15px;
+        z-index: 100; /* Higher z-index */
+        padding: 40px;
+        background: transparent;
+        transition: 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+        margin-top: 20px;
+        pointer-events: auto; /* Make clickable */
+    }
+
+    .morphing .register-form-box {
+        opacity: 0;
+        transform: scale(0.9);
+        pointer-events: none;
+    }
+
+    .register-form-box h2 {
+        font-size: 2.2em;
+        color: #fff;
+        margin-bottom: 5px;
+        font-weight: 600;
+        text-shadow: 0 0 20px rgba(255,255,255,0.2);
+    }
+
+    .register-form-box p {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 1em;
+        margin-bottom: 20px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        width: 100%;
+    }
+
+    .inputBx {
+        position: relative;
+        width: 100%;
+    }
+
+    .inputBx input {
+        width: 100%;
+        padding: 12px 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        font-size: 1em;
+        color: #fff;
+        outline: none;
+        transition: 0.3s;
+    }
+
+    .inputBx input:focus {
+        border-color: #4ade80;
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+    }
+
+    .btn-container {
+        grid-column: span 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(45deg, #22c55e, #4ade80);
+        border: none;
+        border-radius: 40px;
+        color: #fff;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+        text-transform: uppercase;
+        margin-top: 10px;
+    }
+
+    .btn-submit:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+    }
+
+    .links {
+        width: 100%;
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .links a {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 0.9em;
+        transition: 0.3s;
+    }
+
+    .links a:hover {
+        color: #4ade80;
+    }
+
+    .alert-container {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    /* Wide Out Transition - COOL & SMOOTH */
+    .wide-out .line-box i {
+        transform: scale(25) rotate(180deg) !important;
+        opacity: 0 !important;
+        transition: 1.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        border-width: 0.5px !important;
+        filter: blur(10px) brightness(2) !important;
+    }
+
+    .wide-out .line-box:nth-child(2) i {
+        transition-delay: 0.1s !important;
+        border-color: #4ade80 !important;
+    }
+
+    .wide-out .line-box:nth-child(3) i {
+        transition-delay: 0.2s !important;
+        transform: scale(25) rotate(-180deg) !important;
+    }
+
+    .wide-out .register-form-box {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+        filter: blur(5px);
+        transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
+    }
+
+    /* Screen flash effect */
+    .wide-out::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        opacity: 0;
+        z-index: 1000;
+        pointer-events: none;
+        animation: flash 1.5s ease-out forwards;
+    }
+
+    @keyframes flash {
+        0% { opacity: 0; }
+        70% { opacity: 0.1; }
+        100% { opacity: 0; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-animation">
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="dot" style="left: 10%; animation-delay: 0s; width: 2px; height: 2px;"></div>
+    <div class="dot" style="left: 25%; animation-delay: 2s; width: 3px; height: 3px;"></div>
+    <div class="dot" style="left: 40%; animation-delay: 5s; width: 2px; height: 2px;"></div>
+    <div class="dot" style="left: 55%; animation-delay: 1s; width: 4px; height: 4px;"></div>
+    <div class="dot" style="left: 70%; animation-delay: 8s; width: 2px; height: 2px;"></div>
+    <div class="dot" style="left: 85%; animation-delay: 3s; width: 3px; height: 3px;"></div>
+</div>
+
+<canvas id="heroCanvas" data-no-lines="true" data-particle-theme="leaf" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.4; pointer-events: none;"></canvas>
+
+<div class="register-container" id="registerContainer">
+    <div class="lines-wrapper" id="linesWrapper">
+        <div class="line-box"><i></i></div>
+        <div class="line-box"><i></i></div>
+        <div class="line-box"><i></i></div>
+        <div class="line-box"><i></i></div>
+        <div class="line-box"><i></i></div>
+        <div class="line-box"><i></i></div>
+        <div class="line-box"><i></i></div>
+        <div class="line-box"><i></i></div>
+    </div>
+    
+    <div class="register-form-box">
+        <h2>Create Account</h2>
+        <p>Join Leafora AI today</p>
+        
+        <div class="alert-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show py-2 small border-0 bg-dark text-light" role="alert" style="border-radius: 10px; background: rgba(0,0,0,0.6) !important; backdrop-filter: blur(5px);">
+                            {{ message }}
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <form method="POST" action="{{ url_for('register') }}" class="w-100">
+            <div class="form-grid">
+                <div class="inputBx">
+                    <input type="text" name="username" placeholder="Username" required autofocus>
+                </div>
+                <div class="inputBx">
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+                <div class="inputBx">
+                    <input type="email" name="email" placeholder="Email Address" required>
+                </div>
+                <div class="inputBx">
+                    <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+                </div>
+                
+                <div class="btn-container">
+                    <button type="submit" class="btn-submit">Register</button>
+                    <div class="links">
+                        <a href="{{ url_for('login') }}" id="loginLink">Already have an account? Login</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Handle "Already have an account?" link click
+    document.getElementById('loginLink').addEventListener('click', function(e) {
+        e.preventDefault();
+        const container = document.getElementById('registerContainer');
+        container.classList.add('morphing');
+        
+        // After animation, redirect
+        setTimeout(() => {
+            window.location.href = this.href;
+        }, 1500); // Wait for the 1.5s smooth transition to complete
+    });
+
+    // Handle form submission for registration
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (this.checkValidity()) {
+            e.preventDefault();
+            const container = document.getElementById('registerContainer');
+            container.classList.add('wide-out');
+            
+            // Wait for animation to progress before submitting
+            setTimeout(() => {
+                this.submit();
+            }, 1000);
+        }
+    });
+</script>
+{% endblock %}

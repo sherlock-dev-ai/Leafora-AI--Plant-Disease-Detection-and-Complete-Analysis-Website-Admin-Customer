@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Neural Scan - Leafora AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold mb-3">AI Diagnostic Scan</h1>
+        <p class="text-muted lead" style="max-width: 600px; margin: 0 auto;">
+            Upload crop imagery for deep-learning analysis. Our neural network detects disease patterns with high precision.
+        </p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card bg-dark border-secondary p-5 position-relative overflow-hidden">
+                
+                <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data" id="uploadForm">
+                    
+                    <!-- Scan Container -->
+                    <div class="p-5 text-center" id="dropZone" style="border: 2px dashed var(--bs-secondary); border-radius: 10px; background-color: rgba(255, 255, 255, 0.02);">
+                        
+                        <div class="upload-content">
+                            <div class="mb-4">
+                                <i class="bi bi-cpu fs-1 text-primary"></i>
+                            </div>
+                            <h3 class="fw-bold mb-2">Initiate Scan</h3>
+                            <p class="text-muted mb-4">Drag & drop high-res image or browse system</p>
+                            
+                            <label for="file" class="btn btn-primary btn-lg px-5 rounded-pill">
+                                <i class="bi bi-upload me-2"></i> Select Specimen
+                            </label>
+                            <input type="file" class="d-none" id="file" name="file" accept="image/*" required>
+                        </div>
+
+                        <!-- Preview State (Hidden by default) -->
+                        <div class="preview-content d-none h-100 d-flex flex-column justify-content-center align-items-center">
+                            <div class="position-relative rounded-3 overflow-hidden mb-4 shadow-lg border border-secondary" style="max-height: 400px;">
+                                <img id="imagePreview" src="" alt="Scan Target" class="img-fluid" style="max-height: 400px; object-fit: contain;">
+                            </div>
+                            
+                            <div class="d-flex gap-3">
+                                <button type="button" class="btn btn-outline-secondary" id="resetBtn">
+                                    <i class="bi bi-x-lg me-2"></i> Cancel
+                                </button>
+                                <button type="submit" class="btn btn-success px-5" id="analyzeBtn">
+                                    <i class="bi bi-search me-2"></i> Run Analysis
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Progress State (Hidden by default) -->
+                    <div class="upload-progress d-none mt-4" id="uploadProgress">
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 100%"></div>
+                        </div>
+                        <div class="text-center mt-2">
+                            <small class="text-muted">Processing...</small>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+            
+            <!-- Specs / Info -->
+            <div class="row mt-4 g-3">
+                <div class="col-md-4">
+                    <div class="card bg-dark border-secondary p-3 text-center h-100">
+                        <i class="bi bi-file-earmark-image text-info fs-4 mb-2 d-block"></i>
+                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Formats</small>
+                        <span class="fw-medium">JPG, PNG, WEBP</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-dark border-secondary p-3 text-center h-100">
+                        <i class="bi bi-arrows-fullscreen text-success fs-4 mb-2 d-block"></i>
+                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Resolution</small>
+                        <span class="fw-medium">Min 256x256px</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-dark border-secondary p-3 text-center h-100">
+                        <i class="bi bi-shield-check text-primary fs-4 mb-2 d-block"></i>
+                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">Privacy</small>
+                        <span class="fw-medium">Encrypted Upload</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('file');
+    const uploadContent = dropZone.querySelector('.upload-content');
+    const previewContent = dropZone.querySelector('.preview-content');
+    const imagePreview = document.getElementById('imagePreview');
+    const resetBtn = document.getElementById('resetBtn');
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadProgress = document.getElementById('uploadProgress');
+
+    // Drag & Drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.style.borderColor = 'var(--bs-primary)', false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.style.borderColor = 'var(--bs-secondary)', false);
+    });
+
+    dropZone.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles(files);
+    }
+
+    fileInput.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+
+    function handleFiles(files) {
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    uploadContent.classList.add('d-none');
+                    previewContent.classList.remove('d-none');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+    }
+
+    resetBtn.addEventListener('click', () => {
+        fileInput.value = '';
+        previewContent.classList.add('d-none');
+        uploadContent.classList.remove('d-none');
+    });
+
+    // Submit Animation
+    uploadForm.addEventListener('submit', (e) => {
+        const btn = document.getElementById('analyzeBtn');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
+        btn.disabled = true;
+        resetBtn.disabled = true;
+        
+        uploadProgress.classList.remove('d-none');
+    });
+</script>
+{% endblock %}

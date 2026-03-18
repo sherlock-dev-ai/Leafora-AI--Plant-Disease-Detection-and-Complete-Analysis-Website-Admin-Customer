@@ -1,0 +1,6 @@
+{
+  "cursor_animation": "comet_trail",
+  "page_animations": {
+    "global": "moving_dots"
+  }
+}

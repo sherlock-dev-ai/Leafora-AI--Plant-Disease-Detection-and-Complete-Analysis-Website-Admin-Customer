@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Database Viewer - Leafora AI Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-2">
+                <i class="bi bi-database"></i> Database Viewer
+            </h2>
+            <p class="text-secondary">View all database tables, schemas, and data</p>
+            <p class="text-muted">
+                <small><i class="bi bi-info-circle"></i> Database location: <code>{{ db_path }}</code></small>
+            </p>
+        </div>
+    </div>
+
+            {% for table_name, table_info in tables_info.items() %}
+            <div class="card bg-dark border-secondary mb-4">
+                <div class="card-header border-secondary">
+                    <h3 class="card-title mb-0">
+                <i class="bi bi-table"></i> {{ table_name }}
+                <span class="badge bg-primary ms-2">{{ table_info.row_count }} row(s)</span>
+            </h3>
+            {% if table_info.description %}
+            <p class="text-secondary mt-1 mb-0"><small>{{ table_info.description }}</small></p>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <!-- Schema -->
+            <div class="mb-4">
+                <h5><i class="bi bi-list-ul"></i> Schema</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered border-secondary table-dark">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Data Type</th>
+                                <th>Constraint</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for col in table_info.columns %}
+                            <tr>
+                                <td><strong>{{ col.field }}</strong></td>
+                                <td><code>{{ col.data_type }}</code></td>
+                                <td>{{ col.constraint or 'NOT NULL' }}</td>
+                                <td>{{ col.description }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sample Data -->
+            {% if table_info.sample_data %}
+            <div>
+                <h5><i class="bi bi-data"></i> Sample Data 
+                    {% if table_info.row_count > 10 %}
+                    <small class="text-muted">(showing first 10 of {{ table_info.row_count }} rows)</small>
+                    {% endif %}
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-dark border-secondary">
+                        <thead>
+                            <tr>
+                                {% for col_name in table_info.sample_data[0].keys() %}
+                                <th>{{ col_name }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in table_info.sample_data %}
+                            <tr>
+                                {% for col_name, value in row.items() %}
+                                <td>
+                                    {% if value is none %}
+                                    <span class="text-muted">NULL</span>
+                                    {% elif value|string|length > 50 %}
+                                    <span title="{{ value }}">{{ value|string|truncate(50) }}</span>
+                                    {% else %}
+                                    {{ value }}
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No data in this table.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="card bg-dark border-secondary">
+        <div class="card-body">
+            <h5><i class="bi bi-info-circle"></i> Quick Actions</h5>
+            <p class="mb-2">You can also view the database using:</p>
+            <ul>
+                <li><strong>Python script:</strong> Run <code>python view_database.py</code> in the terminal</li>
+                <li><strong>SQLite Browser:</strong> Open <code>{{ db_path }}</code> with DB Browser for SQLite or similar tool</li>
+                <li><strong>Command line:</strong> Use <code>sqlite3 {{ db_path }}</code> to open the database</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

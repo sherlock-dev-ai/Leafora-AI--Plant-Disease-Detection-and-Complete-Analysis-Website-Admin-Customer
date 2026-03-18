@@ -1,0 +1,99 @@
+"""
+Disease Information & Treatment Management Module
+Contains disease details and treatment information
+"""
+
+# Disease info dictionary - expanded for all 39 classes
+DISEASE_DETAILS = {
+    # Apple diseases
+    "Apple - Apple Scab": "Remove infected leaves and fruit. Apply fungicide containing myclobutanil or propiconazole. Improve air circulation and reduce humidity. Prune to allow better sunlight penetration.",
+    "Apple - Black Rot": "Remove and destroy infected fruit and leaves. Apply copper-based fungicides. Ensure proper spacing and pruning for air circulation.",
+    "Apple - Cedar Apple Rust": "Remove nearby cedar/juniper trees if possible. Apply fungicides with myclobutanil or propiconazole. Plant rust-resistant varieties.",
+    "Apple - Healthy": "Your apple tree is healthy! Continue with regular care, proper watering, and monitoring.",
+    
+    # Corn diseases
+    "Corn - Cercospora Leaf Spot / Gray Leaf Spot": "Apply fungicides containing azoxystrobin or pyraclostrobin. Rotate crops and use resistant varieties. Remove crop debris after harvest.",
+    "Corn - Common Rust": "Apply fungicides if disease appears early. Use rust-resistant corn varieties. Ensure proper spacing for air circulation.",
+    "Corn - Healthy": "Your corn crop is healthy! Maintain proper nutrition and watering.",
+    "Corn - Northern Leaf Blight": "Apply fungicides with chlorothalonil or mancozeb. Use resistant varieties and practice crop rotation.",
+    
+    # Grape diseases
+    "Grape - Black Rot": "Remove and destroy infected fruit and leaves. Apply fungicides containing captan or mancozeb. Improve air circulation through pruning.",
+    "Grape - Esca (Black Measles)": "Prune infected canes. There is no effective chemical treatment. Maintain vine health and remove infected wood.",
+    "Grape - Healthy": "Your grapevine is healthy! Continue proper pruning and care.",
+    "Grape - Leaf Blight (Isariopsis Leaf Spot)": "Apply fungicides and improve air circulation. Remove infected leaves.",
+    
+    # Tomato diseases
+    "Tomato - Bacterial Spot": "Apply copper-based bactericides. Use disease-free seeds. Remove infected plants. Avoid overhead watering.",
+    "Tomato - Early Blight": "Apply fungicides containing chlorothalonil or mancozeb. Remove lower infected leaves. Improve air circulation.",
+    "Tomato - Healthy": "Your tomato plant is healthy! Continue with regular care and monitoring.",
+    "Tomato - Late Blight": "Apply fungicides immediately. Remove and destroy infected plants. This is a serious disease requiring prompt action.",
+    "Tomato - Leaf Mold": "Improve air circulation. Apply fungicides. Reduce humidity in greenhouse settings.",
+    "Tomato - Septoria Leaf Spot": "Remove infected leaves. Apply fungicides. Avoid overhead watering.",
+    "Tomato - Spider Mites (Two-Spotted Spider Mite)": "Apply miticides. Increase humidity. Use insecticidal soaps. Remove heavily infested leaves.",
+    "Tomato - Target Spot": "Apply fungicides. Remove infected leaves. Improve air circulation.",
+    "Tomato - Tomato Mosaic Virus": "Remove infected plants. Use virus-free seeds. Control aphids and other vectors.",
+    "Tomato - Tomato Yellow Leaf Curl Virus": "Remove infected plants. Control whiteflies which spread this virus. Use resistant varieties.",
+    
+    # Potato diseases
+    "Potato - Early Blight": "Apply fungicides. Remove infected leaves. Practice crop rotation.",
+    "Potato - Healthy": "Your potato plant is healthy! Continue proper care.",
+    "Potato - Late Blight": "Apply fungicides immediately. This is a serious disease. Remove and destroy infected plants.",
+    
+    # Pepper diseases
+    "Pepper Bell - Bacterial Spot": "Apply copper-based bactericides. Use disease-free seeds. Remove infected plants.",
+    "Pepper Bell - Healthy": "Your pepper plant is healthy! Continue regular care.",
+    
+    # Peach diseases
+    "Peach - Bacterial Spot": "Apply copper-based bactericides during dormancy. Prune infected branches. Use resistant varieties.",
+    "Peach - Healthy": "Your peach tree is healthy! Continue proper pruning and care.",
+    
+    # Cherry diseases
+    "Cherry - Healthy": "Your cherry tree is healthy! Continue regular care.",
+    "Cherry - Powdery Mildew": "Apply fungicides containing sulfur or myclobutanil. Improve air circulation through pruning.",
+    
+    # Rice diseases
+    "Rice - Bacterial Leaf Blight": "Apply copper-based bactericides. Use resistant varieties. Avoid excessive nitrogen fertilization. Practice proper water management and field sanitation.",
+    "Rice - Brown Spot": "Apply fungicides containing propiconazole or azoxystrobin. Use resistant varieties. Improve soil nutrition, especially silicon. Practice crop rotation.",
+    "Rice - Healthy": "Your rice crop is healthy! Continue with proper water management, balanced fertilization, and regular monitoring.",
+    "Rice - Leaf Blast": "Apply fungicides containing tricyclazole, isoprothiolane, or edifenphos. Use blast-resistant varieties. Avoid excessive nitrogen. Maintain proper water levels.",
+    "Rice - Leaf Scald": "Apply fungicides containing propiconazole or tebuconazole. Use resistant varieties. Improve field drainage and reduce humidity. Remove infected plant debris.",
+    "Rice - Narrow Brown Leaf Spot": "Apply fungicides containing azoxystrobin or propiconazole. Use resistant varieties. Maintain balanced nutrition. Practice field sanitation.",
+    "Rice - Neck Blast": "Apply fungicides containing tricyclazole or isoprothiolane at booting stage. Use resistant varieties. Avoid excessive nitrogen. This disease affects grain filling.",
+    "Rice - Rice Hispa": "Apply insecticides containing chlorpyriphos or quinalphos. Remove and destroy affected leaves. Use resistant varieties. Maintain proper field hygiene.",
+    "Rice - Sheath Blight": "Apply fungicides containing validamycin, propiconazole, or azoxystrobin. Use resistant varieties. Improve field drainage. Avoid dense planting and excessive nitrogen.",
+    "Rice - Tungro": "This is a serious viral disease. Remove and destroy infected plants immediately. Control green leafhoppers (vectors) with insecticides. Use resistant varieties. Practice crop rotation.",
+    "Rice - Becterial Blight": "Apply copper-based bactericides. Use resistant varieties. Avoid excessive nitrogen. Practice proper water management and field sanitation.",
+    "Rice - Rice Blast": "Apply fungicides containing tricyclazole, isoprothiolane, or edifenphos. Use blast-resistant varieties. Avoid excessive nitrogen. Maintain proper water levels.",
+    
+    # Other plants
+    "Blueberry - Healthy": "Your blueberry plant is healthy! Maintain acidic soil conditions.",
+    "Raspberry - Healthy": "Your raspberry plant is healthy! Continue proper care.",
+    "Soybean - Healthy": "Your soybean crop is healthy! Maintain proper nutrition.",
+    "Squash - Powdery Mildew": "Apply fungicides. Improve air circulation. Remove infected leaves.",
+    "Strawberry - Healthy": "Your strawberry plant is healthy! Continue regular care.",
+    "Strawberry - Leaf Scorch": "Apply fungicides. Remove infected leaves. Improve air circulation.",
+    "Orange - Haunglongbing (Citrus Greening)": "This is a serious bacterial disease. Remove infected trees. Control psyllid vectors. There is no cure.",
+    "Background (No Plant)": "No plant detected in image. Please upload a clear image of a plant leaf.",
+    
+    # Generic fallback
+    "Healthy": "Your plant appears healthy! Continue with regular care and monitoring.",
+    "Continue monitoring your plant for any changes.": "Continue monitoring your plant for any changes."
+}
+
+
+def get_disease_info(disease_name):
+    """Get disease information and treatment details"""
+    return DISEASE_DETAILS.get(disease_name, "No specific treatment information available. Please consult with an agricultural expert.")
+
+
+def get_all_diseases():
+    """Get all available diseases"""
+    return list(DISEASE_DETAILS.keys())
+
+
+def search_diseases(query):
+    """Search diseases by name"""
+    query_lower = query.lower()
+    return [disease for disease in DISEASE_DETAILS.keys() if query_lower in disease.lower()]
+

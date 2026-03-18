@@ -1,0 +1,39 @@
+{% if session.is_admin %}
+<aside class="sidebar-right" id="sidebar-right">
+    <nav class="sidebar-nav">
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Admin Tools</div>
+
+            <a href="{{ url_for('admin_model_management') }}"
+               class="sidebar-item {% if request.endpoint == 'admin_model_management' %}active{% endif %}">
+                <i class="bi bi-cpu"></i>
+                <span>Model Management</span>
+            </a>
+
+            <a href="{{ url_for('admin_model_performance') }}"
+               class="sidebar-item {% if request.endpoint == 'admin_model_performance' %}active{% endif %}">
+                <i class="bi bi-bar-chart-line"></i>
+                <span>Model Performance</span>
+            </a>
+
+            <a href="{{ url_for('admin_system_logs') }}"
+               class="sidebar-item {% if request.endpoint == 'admin_system_logs' %}active{% endif %}">
+                <i class="bi bi-hdd-network"></i>
+                <span>Server Management</span>
+            </a>
+
+            <a href="{{ url_for('admin_logs') }}"
+               class="sidebar-item {% if request.endpoint == 'admin_logs' %}active{% endif %}">
+                <i class="bi bi-activity"></i>
+                <span>Activity Logs</span>
+            </a>
+
+            <a href="{{ url_for('admin_database') }}"
+               class="sidebar-item {% if request.endpoint == 'admin_database' %}active{% endif %}">
+                <i class="bi bi-database"></i>
+                <span>Database Viewer</span>
+            </a>
+        </div>
+    </nav>
+</aside>
+{% endif %}

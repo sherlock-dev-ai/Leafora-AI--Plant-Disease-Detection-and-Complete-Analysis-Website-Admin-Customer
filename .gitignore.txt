@@ -1,0 +1,8 @@
+*.safetensors
+*.bin
+*.keras
+m_models/
+detection/*.keras
+*.log
+__pycache__/
+.env

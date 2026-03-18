@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Predictions - Leafora AI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>📊 All Predictions</h2>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+
+        <div class="card shadow">
+            <div class="card-body">
+                {% if predictions %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Date & Time</th>
+                                <th>Result</th>
+                                <th>Confidence</th>
+                                <th>Image</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pred in predictions %}
+                            <tr>
+                                <td>{{ pred.id }}</td>
+                                <td>{{ pred.user.username }}</td>
+                                <td>{{ pred.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if pred.result == 'Healthy' else 'warning' }}">
+                                        {{ pred.result }}
+                                    </span>
+                                </td>
+                                <td>{{ "%.2f"|format(pred.confidence) }}%</td>
+                                <td>
+                                    <a href="{{ url_for('static', filename='uploads/' + pred.filename) }}" 
+                                       target="_blank" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                </td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('admin_delete_prediction', prediction_id=pred.id) }}" 
+                                          style="display: inline;" 
+                                          onsubmit="return confirm('Are you sure you want to delete this prediction?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center text-muted">No predictions found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

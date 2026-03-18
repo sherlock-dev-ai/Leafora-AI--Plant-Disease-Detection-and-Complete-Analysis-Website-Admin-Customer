@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Subscribe to Pro - Leafora AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid spacing-section">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h2 class="mb-2">Subscribe to Pro</h2>
+                    <p class="text-secondary mb-0">
+                        <span class="plan-price" style="font-size: 2rem;">₹1499</span>
+                        <span class="text-secondary">/month</span>
+                    </p>
+                    <p class="text-secondary small mt-2">Unlimited detections • Multi-model results • 30-day subscription</p>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="payment-form">
+                        <div class="mb-4">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ user.email }}" required readonly>
+                            <small class="text-secondary">Your account email</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₹</span>
+                                <input type="text" class="form-control" value="1499" readonly>
+                                <span class="input-group-text">INR</span>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Payment Method</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_type" id="pay_qr" value="qr" checked>
+                                    <label class="form-check-label" for="pay_qr">QR Code (PhonePe)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_type" id="pay_card" value="card">
+                                    <label class="form-check-label" for="pay_card">Card</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="qr-info" class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Secure Payment:</strong> You will be redirected to PhonePe to complete your payment securely.
+                        </div>
+
+                        <div id="card-fields" style="display: none;">
+                            <div class="mb-3">
+                                <label for="card_name" class="form-label">Cardholder Name</label>
+                                <input type="text" class="form-control" id="card_name" name="card_name" placeholder="Full name on card">
+                            </div>
+                            <div class="mb-3">
+                                    <label for="card_number" class="form-label">Card Number</label>
+                                    <input type="text" class="form-control" id="card_number" name="card_number" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="expiry" class="form-label">Expiry (MM/YY)</label>
+                                    <input type="text" class="form-control" id="expiry" name="expiry" inputmode="numeric" maxlength="5" placeholder="MM/YY">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="password" class="form-control" id="cvv" name="cvv" inputmode="numeric" maxlength="3" placeholder="123">
+                                </div>
+                            </div>
+                            <div class="alert alert-warning">
+                                <i class="bi bi-shield-lock me-2"></i>
+                                Your card details are validated and not stored.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+                                <i class="bi bi-wallet2 me-2"></i>
+                                Proceed
+                            </button>
+                            <a href="{{ url_for('plans') }}" class="btn btn-outline-primary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const payQr = document.getElementById('pay_qr');
+    const payCard = document.getElementById('pay_card');
+    const qrInfo = document.getElementById('qr-info');
+    const cardFields = document.getElementById('card-fields');
+    const submitBtn = document.getElementById('submit-btn');
+    const cardNumber = document.getElementById('card_number');
+    const expiry = document.getElementById('expiry');
+    const cvv = document.getElementById('cvv');
+    function toggle() {
+        if (payCard.checked) {
+            qrInfo.style.display = 'none';
+            cardFields.style.display = 'block';
+            submitBtn.innerText = 'Pay with Card';
+        } else {
+            qrInfo.style.display = 'block';
+            cardFields.style.display = 'none';
+            submitBtn.innerText = 'Proceed to PhonePe';
+        }
+    }
+    payQr.addEventListener('change', toggle);
+    payCard.addEventListener('change', toggle);
+    toggle();
+
+    function formatCardNumber(value) {
+        const digits = value.replace(/\D/g, '').slice(0, 16);
+        return digits.replace(/(.{4})/g, '$1 ').trim();
+    }
+
+    function formatExpiry(value) {
+        const digits = value.replace(/\D/g, '').slice(0, 4);
+        if (digits.length <= 2) return digits;
+        return digits.slice(0,2) + '/' + digits.slice(2);
+    }
+
+    if (cardNumber) {
+        cardNumber.addEventListener('input', function(e) {
+            const pos = this.selectionStart;
+            const before = this.value;
+            this.value = formatCardNumber(this.value);
+            const after = this.value;
+            const diff = after.length - before.length;
+            this.selectionStart = this.selectionEnd = pos + (diff > 0 ? diff : 0);
+        });
+    }
+    if (expiry) {
+        expiry.addEventListener('input', function(e) {
+            const pos = this.selectionStart;
+            const before = this.value;
+            this.value = formatExpiry(this.value);
+            const after = this.value;
+            const diff = after.length - before.length;
+            this.selectionStart = this.selectionEnd = pos + (diff > 0 ? diff : 0);
+        });
+    }
+    if (cvv) {
+        cvv.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0,3);
+        });
+    }
+});
+</script>
+{% endblock %}

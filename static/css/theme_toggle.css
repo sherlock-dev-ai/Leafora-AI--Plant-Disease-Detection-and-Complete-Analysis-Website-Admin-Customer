@@ -1,0 +1,93 @@
+
+/* Premium Theme Toggle Switch */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+    margin-right: 1.5rem;
+}
+
+.theme-switch {
+    display: inline-block;
+    height: 34px;
+    position: relative;
+    width: 68px;
+    margin-bottom: 0;
+}
+
+.theme-switch input {
+    display: none;
+}
+
+.slider {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-glass);
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .4s;
+    backdrop-filter: blur(4px);
+}
+
+[data-theme="light"] .slider {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.slider:before {
+    background-color: var(--accent-primary);
+    bottom: 4px;
+    content: "";
+    height: 24px;
+    left: 4px;
+    position: absolute;
+    transition: .4s;
+    width: 24px;
+    z-index: 2;
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+input:checked + .slider:before {
+    transform: translateX(34px);
+    background-color: #ffaa00; /* Warm sun color for light mode toggle */
+    box-shadow: 0 0 10px rgba(255, 170, 0, 0.4);
+}
+
+/* Icons inside the toggle */
+.sun-icon, .moon-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    z-index: 1;
+    transition: opacity 0.3s ease;
+}
+
+.moon-icon {
+    left: 9px;
+    color: #fff;
+    opacity: 1;
+}
+
+.sun-icon {
+    right: 9px;
+    color: #555;
+    opacity: 0;
+}
+
+input:checked + .slider .moon-icon {
+    opacity: 0;
+}
+
+input:checked + .slider .sun-icon {
+    opacity: 1;
+}
