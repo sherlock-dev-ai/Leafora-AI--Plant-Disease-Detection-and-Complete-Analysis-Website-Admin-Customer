@@ -50,8 +50,8 @@ It helps farmers, agronomists, and researchers quickly identify plant health iss
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/sherlock-dev-ai/<your-repo-name>.git
-cd <your-repo-name>
+git clone https://github.com/sherlock-dev-ai/Leafora-AI--Plant-Disease-Detection-and-Complete-Analysis-Website-Admin-Customer.git
+cd Leafora-AI--Plant-Disease-Detection-and-Complete-Analysis-Website-Admin-Customer
 ```
 
 ### 2. Create and Activate a Virtual Environment (Recommended)
