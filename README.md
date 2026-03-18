@@ -181,17 +181,15 @@ You can:
 
 ## License
 
-Specify your license here (for example):
 
 - **MIT License** – see `LICENSE` for details.
 
-If you haven’t chosen a license yet, consider adding one before making the repo public.
-
+ **not allowed for commercial purposes**
 ---
 
 ## Author & Acknowledgements
 
-- **Author**: (Add your name / team name here)
+- **Author**: sherlock-dev-ai
 - **Project**: Lefora AI – Deep Learning Crop Disease Detection System
 
 Special thanks to:
