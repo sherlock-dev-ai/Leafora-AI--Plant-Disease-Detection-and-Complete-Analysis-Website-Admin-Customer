@@ -129,6 +129,11 @@ By default, the app will be available at `http://127.0.0.1:5000/`.
 
 ---
 
+<p align="center">
+  <img src="docs/hero1.png" alt="Lefora AI – AI-powered crop disease detection" width="100%">
+</p>
+
+
 ## Admin Access
 
 - **Admin login URL**: Visit the regular login page, then navigate to the admin dashboard at `/admin` after logging in as admin.  
